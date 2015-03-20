@@ -1,0 +1,8 @@
+[package]
+
+name = "pam-auth"
+version = "0.0.1"
+authors = ["Florian Wilkens <mrfloya_github@outlook.com>"]
+
+[dependencies.pam-sys]
+git = "https://github.com/MrFloya/pam-sys.git"

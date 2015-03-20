@@ -1,0 +1,12 @@
+[root]
+name = "pam-auth"
+version = "0.0.1"
+dependencies = [
+ "pam-sys 0.0.1 (git+https://github.com/MrFloya/pam-sys.git)",
+]
+
+[[package]]
+name = "pam-sys"
+version = "0.0.1"
+source = "git+https://github.com/MrFloya/pam-sys.git#a92563e709900fe34782d9b85596758968314eee"
+

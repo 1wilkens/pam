@@ -1,11 +1,10 @@
 [package]
 
 name = "pam-auth"
-version = "0.0.1"
+version = "0.0.2-pre"
 authors = ["Florian Wilkens <mrfloya_github@outlook.com>"]
 
 [dependencies]
 libc = "*"
-
-[dependencies.pam-sys]
-git = "https://github.com/MrFloya/pam-sys.git"
+c_vec = "*"
+pam-sys = "*"

@@ -3,7 +3,7 @@
 extern crate libc;
 extern crate c_vec;
 
-extern crate "pam-sys" as ffi;
+extern crate pam_sys as ffi;
 
 use libc::{calloc, free, c_char, c_int, c_void, size_t};
 use c_vec::{CVec};

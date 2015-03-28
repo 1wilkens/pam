@@ -105,7 +105,7 @@ pub fn login(service: &str, user: &str, password: &str) -> bool {
     res = unsafe { ffi::setcred(handle, ffi::PamFlag::ESTABLISH_CRED) };
     println!("pam_setcred returned: {:?}", res);
     res = unsafe { ffi::open_session(handle, ffi::PamFlag::NONE) };
-    println!("pam_setcred returned: {:?}", res);
+    println!("pam_open_session returned: {:?}", res);
 
     if res != ffi::PamReturnCode::SUCCESS {
         unsafe { ffi::setcred(handle, ffi::PamFlag::DELETE_CRED) };

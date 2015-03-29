@@ -9,12 +9,12 @@ use libc::{calloc, free, c_char, c_int, c_void, size_t};
 use c_vec::{CVec};
 
 use std::mem;
+use std::slice;
 use std::ptr::{self, Unique};
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 
-extern "C" fn conv(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
+extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
     resp: *mut *mut ffi::PamResponse, appdata_ptr: *mut c_void) -> c_int {
-
     unsafe {
         // allocate space for responses
         *resp = calloc(num_msg as u64, mem::size_of::<ffi::PamResponse>() as size_t) as *mut ffi::PamResponse;
@@ -25,8 +25,8 @@ extern "C" fn conv(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
 
     // wrap function arguments for easier access
     let messages    : CVec<*mut ffi::PamMessage> = unsafe { CVec::new(Unique::new(msg), num_msg as usize) };
-    let responses   : CVec<ffi::PamResponse>     = unsafe { CVec::new(Unique::new(*resp), num_msg as usize) };
-    let data        : CVec<*const c_char>        = unsafe { CVec::new(Unique::new(appdata_ptr as *mut *const c_char), 2) };
+    let mut responses   : CVec<ffi::PamResponse> = unsafe { CVec::new(Unique::new(*resp), num_msg as usize) };
+    let data            : &[&str]                = unsafe { slice::from_raw_parts(appdata_ptr as *const &str, 2) };
 
     let mut result: ffi::PamReturnCode = ffi::PamReturnCode::SUCCESS;
     for i in 0..num_msg as usize {
@@ -36,8 +36,8 @@ extern "C" fn conv(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
                 Some(m) => *m,
                 None    => { result = ffi::PamReturnCode::CONV_ERR; break; }
             };
-            let r: ffi::PamResponse = match responses.get(i) {
-                Some(r) => *r,
+            let r: &mut ffi::PamResponse = match responses.get_mut(i) {
+                Some(r) => r,
                 None    => { result = ffi::PamReturnCode::CONV_ERR; break; }
             };
 
@@ -45,29 +45,23 @@ extern "C" fn conv(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
             match ffi::PamMessageStyle::from_i32((*m).msg_style) {
                 // assume username is requested
                 ffi::PamMessageStyle::PROMPT_ECHO_ON => {
-                    let user_bytes = match data.get(0) {
-                        Some(b) => CStr::from_ptr(*b).to_bytes_with_nul(),
-                        None    => { result = ffi::PamReturnCode::CONV_ERR; break; }
-                    };
-                    ptr::copy(r.resp, user_bytes.as_ptr() as *const c_char, user_bytes.len());
+                    strdup(data[0], &mut r.resp);
                 }
                 // assume password is requested
                 ffi::PamMessageStyle::PROMPT_ECHO_OFF => {
-                    let password_bytes = match data.get(1) {
-                        Some(b) => CStr::from_ptr(*b).to_bytes_with_nul(),
-                        None    => { result = ffi::PamReturnCode::CONV_ERR; break; }
-                    };
-                    ptr::copy(r.resp, password_bytes.as_ptr() as *const c_char, password_bytes.len());
+                    strdup(data[1], &mut r.resp);
                 }
                 // an error occured
                 ffi::PamMessageStyle::ERROR_MSG => {
-                    //println!("Err: {}", CStr::from_ptr((*m).msg));    //TODO: print m->msg to stderr
+                    //println!("    Err: {:?}", CStr::from_ptr((*m).msg));    //TODO: print m->msg to stderr
                     result = ffi::PamReturnCode::CONV_ERR;
                 }
                 // print the message to stdout
                 ffi::PamMessageStyle::TEXT_INFO => println!("{}", /*m.msg*/ "")
             }
         }
+        println!("  Exited loop result: {:?}", result);
+        unsafe { println!("  resp={:p}, *resp={:p}, (**resp).resp={:p}", resp, *resp, (**resp).resp); }
         if result != ffi::PamReturnCode::SUCCESS {
             break;
         }
@@ -76,65 +70,59 @@ extern "C" fn conv(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
     // free allocated memory if an error occured
     if result != ffi::PamReturnCode::SUCCESS {
         unsafe { free(*resp as *mut c_void) };
-        //*resp = ptr::null_mut() as *mut ffi::PamResponse;
     }
 
     result as c_int
 }
 
-pub fn login(service: &str, user: &str, password: &str) -> bool {
-    let service = CString::new(service).unwrap();
-    let user = CString::new(user).unwrap();
-    let password = CString::new(password).unwrap();
-    let mut creds: [*const c_char; 2] = [ptr::null(); 2];
-    creds[0] = user.as_ptr();
-    creds[1] = password.as_ptr();
+fn strdup(inp: &str, outp: &mut *mut c_char) {
+    if !(*outp).is_null() {
+        panic!("Cannot copy &str to non null ptr!");
+    }
+    let len_with_nul: usize = inp.bytes().len() + 1;
+    unsafe {
+        *outp = calloc(mem::size_of::<c_char>() as u64, len_with_nul as u64) as *mut c_char;  // allocate memory
+        ptr::copy_nonoverlapping(*outp, inp.as_ptr() as *const c_char, len_with_nul - 1); // copy string bytes
+    }
+}
 
+pub fn login(service: &str, user: &str, password: &str) -> bool {
+    let creds: [&str; 2] = [user, password];
     let conv = ffi::PamConversation{
-        conv: Some(conv),
+        conv: Some(converse),
         data_ptr: creds.as_ptr() as *mut c_void
     };
     let mut handle: *mut ffi::PamHandle = ptr::null_mut();
 
-    let mut res = unsafe { ffi::start(service.as_ptr(), user.as_ptr(), &conv, &mut handle) };
-    println!("pam_start returned: {:?}", res);
+    let success = ffi::PamReturnCode::SUCCESS;
+    let mut res = unsafe { ffi::start(CString::new(service).unwrap().as_ptr(), ptr::null(), &conv, &mut handle) };
+    if res != success {
+        return pam_fail(handle, "pam_start", res);
+    }
     res = unsafe { ffi::authenticate(handle, ffi::PamFlag::NONE) };
-    println!("pam_authenticate returned: {:?}", res);
+    if res != success {
+        return pam_fail(handle, "pam_authenticate", res);
+    }
     res = unsafe { ffi::acct_mgmt(handle, ffi::PamFlag::NONE) };
-    println!("pam_acct_mgmt returned: {:?}", res);
+    if res != success {
+        return pam_fail(handle, "pam_acct_mgmt", res);
+    }
     res = unsafe { ffi::setcred(handle, ffi::PamFlag::ESTABLISH_CRED) };
-    println!("pam_setcred returned: {:?}", res);
+    if res != success {
+        return pam_fail(handle, "pam_setcred", res);
+    }
     res = unsafe { ffi::open_session(handle, ffi::PamFlag::NONE) };
-    println!("pam_open_session returned: {:?}", res);
-
-    if res != ffi::PamReturnCode::SUCCESS {
-        unsafe { ffi::setcred(handle, ffi::PamFlag::DELETE_CRED) };
-        false
+    if res != success {
+        return pam_fail(handle, "pam_open_session", res);
     }
-    else {
-        true
-    }
+    true
 }
 
-#[test]
-fn test() {
-    use std::io;
-
-    let service = "rdm".to_string();
-    let user = "florian".to_string();
-    let pa = Authenticator::new(&service, &user);
-    let mut pa = match pa {
-        Some(a) => {
-            println!("Got Authenticator!");
-            a
-        },
-        None    => panic!("failed to get Authenticator")
-    };
-    let res = pa.authenticate();
-    println!("pam_authenticate returned: {}", res);
-    /*let mut pw = String::new();
-    match io::stdin().read_line(&mut pw) {
-        Ok(_)   => println!("Got pw: {}", pw),
-        Err(_)  => panic!("Failed to get pw!")
-    };*/
+fn pam_fail(handle: *mut ffi::PamHandle, func: &str, res: ffi::PamReturnCode) -> bool {
+    println!("{} returned: {:?}", func, res);
+    unsafe {
+        ffi::setcred(handle, ffi::PamFlag::DELETE_CRED);
+        ffi::end(handle, 0);
+    }
+    false
 }

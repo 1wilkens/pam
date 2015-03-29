@@ -60,8 +60,6 @@ extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
                 ffi::PamMessageStyle::TEXT_INFO => println!("{}", /*m.msg*/ "")
             }
         }
-        println!("  Exited loop result: {:?}", result);
-        unsafe { println!("  resp={:p}, *resp={:p}, (**resp).resp={:p}", resp, *resp, (**resp).resp); }
         if result != ffi::PamReturnCode::SUCCESS {
             break;
         }

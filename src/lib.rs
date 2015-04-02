@@ -6,12 +6,12 @@ extern crate c_vec;
 extern crate pam_sys as ffi;
 
 use libc::{calloc, free, c_char, c_int, c_void, size_t};
-use c_vec::{CVec};
+use c_vec::CVec;
 
 use std::mem;
 use std::slice;
 use std::ptr::{self, Unique};
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 
 extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
     resp: *mut *mut ffi::PamResponse, appdata_ptr: *mut c_void) -> c_int {
@@ -53,11 +53,13 @@ extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
                 }
                 // an error occured
                 ffi::PamMessageStyle::ERROR_MSG => {
-                    //println!("    Err: {:?}", CStr::from_ptr((*m).msg));    //TODO: print m->msg to stderr
+                    println!("PAM_ERROR_MSG: {}", String::from_utf8_lossy(CStr::from_ptr((*m).msg).to_bytes())); //TODO: simplify this?
                     result = ffi::PamReturnCode::CONV_ERR;
                 }
                 // print the message to stdout
-                ffi::PamMessageStyle::TEXT_INFO => println!("{}", /*m.msg*/ "")
+                ffi::PamMessageStyle::TEXT_INFO => {
+                    println!("PAM_TEXT_INFO: {}", String::from_utf8_lossy(CStr::from_ptr((*m).msg).to_bytes()));
+                }
             }
         }
         if result != ffi::PamReturnCode::SUCCESS {
@@ -80,7 +82,7 @@ fn strdup(inp: &str, outp: &mut *mut c_char) {
     let len_with_nul: usize = inp.bytes().len() + 1;
     unsafe {
         *outp = calloc(mem::size_of::<c_char>() as u64, len_with_nul as u64) as *mut c_char;  // allocate memory
-        ptr::copy_nonoverlapping(*outp, inp.as_ptr() as *const c_char, len_with_nul - 1); // copy string bytes
+        ptr::copy_nonoverlapping(*outp, inp.as_ptr() as *mut c_char, len_with_nul - 1); // copy string bytes
     }
 }
 

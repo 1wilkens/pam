@@ -29,6 +29,7 @@ pub fn main() {
 
 ## TODO:
   - [x] Implement basic user/password authentication
+  - [ ] Add documentation
   - [ ] Verify current `conv` does not leak memory
   - [ ] Allow custom `conv` functions to be passed (in pam-sys?)
   - [ ] Code cleanup

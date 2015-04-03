@@ -1,13 +1,14 @@
 [package]
 
 name = "pam-auth"
-version = "0.0.5"
+version = "0.1.0"
 authors = ["Florian Wilkens <mrfloya_github@outlook.com>"]
 description = "Safe Rust wrapper for PAM authentification"
+repository = "https://github.com/mrfloya/pam-auth"
+documentation = "http://mrfloya.github.io/pam-auth/index.html"
 readme = "README.md"
 license = "MIT"
 
 [dependencies]
 libc    = "*"
-c_vec   = "*"
 pam-sys = "*"

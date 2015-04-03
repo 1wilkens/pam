@@ -1,16 +1,11 @@
-#![feature(unique)]
-
 extern crate libc;
-extern crate c_vec;
-
 extern crate pam_sys as ffi;
 
 use libc::{calloc, free, c_char, c_int, c_void, size_t};
-use c_vec::CVec;
 
 use std::mem;
 use std::slice;
-use std::ptr::{self, Unique};
+use std::ptr;
 use std::ffi::{CStr, CString};
 
 extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
@@ -23,26 +18,19 @@ extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
         }
     }
 
-    // wrap function arguments for easier access
-    let messages    : CVec<*mut ffi::PamMessage> = unsafe { CVec::new(Unique::new(msg), num_msg as usize) };
-    let mut responses   : CVec<ffi::PamResponse> = unsafe { CVec::new(Unique::new(*resp), num_msg as usize) };
+    // wrap function arguments for easier access //TODO: might want to keep these for when CVec can be used in stable?
+    //let messages    : CVec<*mut ffi::PamMessage> = unsafe { CVec::new(Unique::new(msg), num_msg as usize) };
+    //let mut responses   : CVec<ffi::PamResponse> = unsafe { CVec::new(Unique::new(*resp), num_msg as usize) };
     let data            : &[&str]                = unsafe { slice::from_raw_parts(appdata_ptr as *const &str, 2) };
 
     let mut result: ffi::PamReturnCode = ffi::PamReturnCode::SUCCESS;
-    for i in 0..num_msg as usize {
+    for i in 0..num_msg as isize {
         unsafe {
             // get indexed values
-            let m: *mut ffi::PamMessage = match messages.get(i) {
-                Some(m) => *m,
-                None    => { result = ffi::PamReturnCode::CONV_ERR; break; }
-            };
-            let r: &mut ffi::PamResponse = match responses.get_mut(i) {
-                Some(r) => r,
-                None    => { result = ffi::PamReturnCode::CONV_ERR; break; }
-            };
-
+            let m: &mut ffi::PamMessage = &mut **(msg.offset(i));
+            let r: &mut ffi::PamResponse = &mut *((*resp).offset(i));
             // match on msg_style
-            match ffi::PamMessageStyle::from_i32((*m).msg_style) {
+            match ffi::PamMessageStyle::from_i32(m.msg_style) {
                 // assume username is requested
                 ffi::PamMessageStyle::PROMPT_ECHO_ON => {
                     strdup(data[0], &mut r.resp);
@@ -53,12 +41,12 @@ extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
                 }
                 // an error occured
                 ffi::PamMessageStyle::ERROR_MSG => {
-                    println!("PAM_ERROR_MSG: {}", String::from_utf8_lossy(CStr::from_ptr((*m).msg).to_bytes())); //TODO: simplify this?
+                    println!("PAM_ERROR_MSG: {}", String::from_utf8_lossy(CStr::from_ptr(m.msg).to_bytes())); //TODO: simplify this?
                     result = ffi::PamReturnCode::CONV_ERR;
                 }
                 // print the message to stdout
                 ffi::PamMessageStyle::TEXT_INFO => {
-                    println!("PAM_TEXT_INFO: {}", String::from_utf8_lossy(CStr::from_ptr((*m).msg).to_bytes()));
+                    println!("PAM_TEXT_INFO: {}", String::from_utf8_lossy(CStr::from_ptr(m.msg).to_bytes()));
                 }
             }
         }
@@ -76,13 +64,13 @@ extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
 }
 
 fn strdup(inp: &str, outp: &mut *mut c_char) {
-    if !(*outp).is_null() {
+    if !outp.is_null() {
         panic!("Cannot copy &str to non null ptr!");
     }
     let len_with_nul: usize = inp.bytes().len() + 1;
     unsafe {
         *outp = calloc(mem::size_of::<c_char>() as u64, len_with_nul as u64) as *mut c_char;  // allocate memory
-        ptr::copy_nonoverlapping(*outp, inp.as_ptr() as *mut c_char, len_with_nul - 1); // copy string bytes
+        ptr::copy_nonoverlapping(inp.as_ptr() as *const c_char, *outp, len_with_nul - 1); // copy string bytes
     }
 }
 

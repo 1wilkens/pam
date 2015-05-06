@@ -12,3 +12,4 @@ license = "MIT"
 [dependencies]
 libc    = "*"
 pam-sys = "*"
+users   = "*"

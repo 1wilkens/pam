@@ -1,4 +1,4 @@
-# pam-auth [![Build Status](https://travis-ci.org/MrFloya/pam-auth.svg)](https://travis-ci.org/MrFloya/pam-auth)
+# pam-auth [![Version](https://img.shields.io/crates/v/pam-auth.svg)](https://crates.io/crates/pam-sys) [![Build Status](https://travis-ci.org/MrFloya/pam-auth.svg)](https://travis-ci.org/MrFloya/pam-auth)
 
 Safe Rust bindings to Linux Pluggable Authentication Modules (PAM).
 Currently only support basic username/password authentication.

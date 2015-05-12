@@ -17,13 +17,114 @@
 
 extern crate libc;
 extern crate pam_sys as ffi;
+extern crate users;
+
+use std::env;
+use std::ffi::{CStr, CString};
+use std::mem;
+use std::ptr;
+use std::slice;
 
 use libc::{calloc, free, c_char, c_int, c_void, size_t};
 
-use std::mem;
-use std::slice;
-use std::ptr;
-use std::ffi::{CStr, CString};
+pub struct Authenticator<'a> {
+    handle:         *mut ffi::PamHandle,
+    credentials:    [&'a str; 2]
+}
+
+impl <'a> Authenticator<'a> {
+    /// Creates a new Authenticator with a given service name
+    pub fn new(service: &str) -> Option<Authenticator> {
+        let creds = [""; 2];
+        let conv = ffi::PamConversation {
+            conv:       Some(converse),
+            data_ptr:   creds.as_ptr() as *mut c_void
+        };
+        let mut handle: *mut ffi::PamHandle = ptr::null_mut();
+
+        match unsafe {
+            ffi::start(CString::new(service).unwrap().as_ptr(), ptr::null(), &conv, &mut handle)
+        } {
+            ffi::PamReturnCode::SUCCESS => Some(Authenticator {
+                handle:         handle,
+                credentials:    creds
+            }),
+            _   => None
+        }
+    }
+
+    /// Set the credentials which should be used in the authentication process
+    pub fn set_credentials(&mut self, user: &'a str, password: &'a str) {
+        self.credentials[0] = user;
+        self.credentials[1] = password;
+    }
+
+    /// Perform the authentication with the provided credentials
+    pub fn authenticate(&self) {
+        let success = ffi::PamReturnCode::SUCCESS;
+
+        let mut res = unsafe { ffi::authenticate(self.handle, ffi::PamFlag::NONE) };
+        if res != success {
+            self.fail();
+            return; //TODO: not very nice, find a better solution
+        }
+
+        res = unsafe { ffi::acct_mgmt(self.handle, ffi::PamFlag::NONE) };
+        if res != success {
+            self.fail();
+            return;
+        }
+
+        res = unsafe { ffi::setcred(self.handle, ffi::PamFlag::ESTABLISH_CRED) };
+        if res != success {
+            self.fail();
+            return;
+        }
+    }
+
+    pub fn open_session(&self) {
+        let res = unsafe { ffi::open_session(self.handle, ffi::PamFlag::NONE) };
+        if res != ffi::PamReturnCode::SUCCESS {
+            self.fail();
+            return;
+        }
+        self.initialize_environment();
+    }
+
+    fn initialize_environment(&self) {
+        let user = users::get_user_by_name(self.credentials[0])
+            .expect("Could not get user by name!");
+
+        self.set_env("USER", &user.name);
+        self.set_env("HOME", &user.home_dir);
+        self.set_env("LOGNAME", &user.name);
+        self.set_env("HOME", &user.home_dir);
+        self.set_env("PWD", &user.home_dir);
+        self.set_env("SHELL", &user.shell);
+        // Taken from https://github.com/gsingh93/display-manager/blob/master/pam.c
+        // Should be a better way to get this. Revisit later.
+        self.set_env("PATH", "/usr/local/sbin:/usr/local/bin:/usr/bin");
+    }
+
+    fn set_env(&self, key: &str, value: &str) {
+        // Set regular environment variable
+        env::set_var(key, value);
+
+        // Set pam environment variable
+        let name_value = CString::new(format!("{}={}", key, value)).unwrap();
+        match unsafe { ffi::putenv(self.handle, name_value.as_ptr()) } {
+            ffi::PamReturnCode::SUCCESS => (),
+            _   => panic!("set_env failed!")    //TODO: add proper error handling (through results?)
+        }
+    }
+
+    fn fail(&self) {
+        unsafe {
+            ffi::setcred(self.handle, ffi::PamFlag::DELETE_CRED);
+            ffi::end(self.handle, 0);
+        }
+    }
+}
 
 extern "C" fn converse(num_msg: c_int, msg: *mut *mut ffi::PamMessage,
     resp: *mut *mut ffi::PamResponse, appdata_ptr: *mut c_void) -> c_int {

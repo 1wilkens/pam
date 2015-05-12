@@ -67,26 +67,24 @@ impl <'a> Authenticator<'a> {
     }
 
     /// Perform the authentication with the provided credentials
-    pub fn authenticate(&self) {
+    pub fn authenticate(&self) -> Result<(), PamReturnCode> {
         let success = PamReturnCode::SUCCESS;
 
         let mut res = unsafe { pam::authenticate(self.handle, PamFlag::NONE) };
         if res != success {
-            self.fail();
-            return; //TODO: not very nice, find a better solution
+            return self.fail(res);
         }
 
         res = unsafe { pam::acct_mgmt(self.handle, PamFlag::NONE) };
         if res != success {
-            self.fail();
-            return;
+            return self.fail(res);
         }
 
         res = unsafe { pam::setcred(self.handle, PamFlag::ESTABLISH_CRED) };
         if res != success {
-            self.fail();
-            return;
+            return self.fail(res);
         }
+        Ok(())
     }
 
     /// Open a session for a previously authenticated user and
@@ -94,13 +92,13 @@ impl <'a> Authenticator<'a> {
     ///
     /// Does not currently check for authentication and just calls the ffi method,
     /// but clients should not rely on that.
-    pub fn open_session(&self) {
+    pub fn open_session(&self) -> Result<(), PamReturnCode> {
         let res = unsafe { pam::open_session(self.handle, PamFlag::NONE) };
         if res != PamReturnCode::SUCCESS {
-            self.fail();
-            return;
+            return self.fail(res);
         }
         self.initialize_environment();
+        Ok(())
     }
 
     // Initialize the client environment with common variables.
@@ -137,10 +135,11 @@ impl <'a> Authenticator<'a> {
 
     // Utility function to properly clean up pam
     // TODO: Move or copy this into Authenticator.drop()?
-    fn fail(&self) {
+    fn fail(&self, code: PamReturnCode) -> Result<(), PamReturnCode> {
         unsafe {
             pam::setcred(self.handle, pam::PamFlag::DELETE_CRED);
             pam::end(self.handle, 0);
         }
+        Err(code)
     }
 }

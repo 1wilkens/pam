@@ -26,7 +26,7 @@ pub extern "C" fn converse(num_msg: c_int, msg: *mut *mut PamMessage,
 
     unsafe {
         // allocate space for responses
-        *resp = calloc(num_msg as u64, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse;
+        *resp = calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse;
         if (*resp).is_null() {
             return PamReturnCode::BUF_ERR as c_int;
         }
@@ -84,7 +84,7 @@ fn strdup(inp: &str, outp: &mut *mut c_char) {
     }
     let len_with_nul: usize = inp.bytes().len() + 1;
     unsafe {
-        *outp = calloc(mem::size_of::<c_char>() as u64, len_with_nul as u64) as *mut c_char;  // allocate memory
+        *outp = calloc(mem::size_of::<c_char>() as usize, len_with_nul as usize) as *mut c_char;  // allocate memory
         ptr::copy_nonoverlapping(inp.as_ptr() as *const c_char, *outp, len_with_nul - 1); // copy string bytes
     }
 }

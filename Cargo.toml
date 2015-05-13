@@ -10,6 +10,6 @@ readme = "README.md"
 license = "MIT"
 
 [dependencies]
-libc    = "*"
-pam-sys = "*"
-users   = "*"
+libc    = "0.2.2"
+pam-sys = "0.1.4"
+users   = "0.4.2"

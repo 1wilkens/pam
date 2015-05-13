@@ -9,7 +9,7 @@ Currently only supports basic username/password authentication.
 1. Add `pam-auth` to your Cargo.toml:
 ```toml
 [dependencies]
-pam-auth = "0.0.4-pre1"
+pam-auth = "0.2.0"
 ```
 2. Use the `Authenticator` struct to authenticate and open a session
 ```rust

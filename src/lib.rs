@@ -107,18 +107,23 @@ impl <'a> Authenticator<'a> {
         let user = users::get_user_by_name(self.credentials[0])
             .expect("Could not get user by name!");
 
-        self.set_env("USER", &user.name);
-        self.set_env("LOGNAME", &user.name);
-        self.set_env("HOME", &user.home_dir);
-        self.set_env("PWD", &user.home_dir);
-        self.set_env("SHELL", &user.shell);
-        // Taken from https://github.com/gsingh93/display-manager/blob/master/pam.c
-        // Should be a better way to get this. Revisit later.
-        self.set_env("PATH", "/usr/local/sbin:/usr/local/bin:/usr/bin");
+        let result = self.set_env("USER", &user.name)
+            .and(self.set_env("LOGNAME", &user.name))
+            .and(self.set_env("HOME", &user.home_dir))
+            .and(self.set_env("PWD", &user.home_dir))
+            .and(self.set_env("SHELL", &user.shell))
+            // Taken from https://github.com/gsingh93/display-manager/blob/master/pam.c
+            // Should be a better way to get this. Revisit later.
+            .and(self.set_env("PATH", "$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin"));
+
+        if result.is_err() {
+            println!("Error while environment initialization!");
+            println!("pam_putenv returned: {}", result.unwrap_err());
+        }
     }
 
     // Utility function to set an environment variable in PAM and the process
-    fn set_env(&self, key: &str, value: &str) {
+    fn set_env(&self, key: &str, value: &str) -> Result<(), PamReturnCode> {
         use std::env;
         use std::ffi::CString;
 
@@ -128,8 +133,8 @@ impl <'a> Authenticator<'a> {
         // Set pam environment variable
         let name_value = CString::new(format!("{}={}", key, value)).unwrap();
         match unsafe { pam::putenv(self.handle, name_value.as_ptr()) } {
-            PamReturnCode::SUCCESS => (),
-            _   => panic!("set_env failed!")    //TODO: add proper error handling (through results?)
+            PamReturnCode::SUCCESS  => Ok(()),
+            code                    => Err(code)
         }
     }
 

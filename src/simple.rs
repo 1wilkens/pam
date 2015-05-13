@@ -19,6 +19,8 @@ use std::ffi::CString;
 
 use pam::{PamConversation, PamHandle, PamFlag, PamReturnCode};
 
+/// #[Deprecated]
+/// Use Authenticator.authenticate() instead
 pub fn login(service: &str, user: &str, password: &str) -> bool {
     use std::ptr;
 

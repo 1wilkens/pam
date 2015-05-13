@@ -33,7 +33,7 @@ use pam::{PamConversation, PamFlag, PamHandle, PamReturnCode};
 /// Main struct to authenticate a user
 pub struct Authenticator<'a> {
     handle:         *mut PamHandle,
-    credentials:    [&'a str; 2]
+    credentials:    Box<[&'a str; 2]>
 }
 
 impl <'a> Authenticator<'a> {
@@ -42,7 +42,7 @@ impl <'a> Authenticator<'a> {
         use std::ffi::CString;
         use std::ptr;
 
-        let creds = [""; 2];
+        let creds = Box::new([""; 2]);
         let conv = PamConversation {
             conv:       Some(ffi::converse),
             data_ptr:   creds.as_ptr() as *mut ::libc::c_void

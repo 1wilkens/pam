@@ -3,33 +3,36 @@
 Safe Rust bindings to Linux Pluggable Authentication Modules (PAM).
 Currently only supports basic username/password authentication.
 
+[Documentation @ gh-pages](https://mrfloya.github.io/pam-auth/)
+
 ## Usage
 1. Add `pam-auth` to your Cargo.toml:
 ```toml
 [dependencies]
 pam-auth = "0.0.4-pre1"
 ```
-2. Use the static function to login
+2. Use the `Authenticator` struct to authenticate and open a session
 ```rust
 extern crate pam_auth;
 pub fn main() {
-    let service: "<yourapp>";
-    let user: "<user>";
-    let password: "<pass>";
+        let service: "<yourapp>";
+        let user: "<user>";
+        let password: "<pass>";
 
-    let success = pam_auth::login(service, user, pass);
-    if success {
-        println!("Login succeded!");
-    }
-    else {
-        println!("Login failed =(");
-    }
+        let mut auth = pam_auth::Authenticator::new(service);
+        auth.set_credentials(user, password);
+        if auth.authenticate().is_ok() && auth.open_session().is_ok() {
+            println!("Successfully opened a session!");
+        }
+        else {
+            println!("Authentication failed =/");
+        }
 }
 ```
 
 ## TODO:
   - [x] Implement basic user/password authentication
-  - [ ] Add `Authenticator` struct
+  - [x] Add `Authenticator` struct
   - [ ] Add documentation
   - [ ] Verify current `conv` does not leak memory
   - [ ] Allow custom `conv` functions to be passed (in pam-sys?)

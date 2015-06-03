@@ -1,4 +1,5 @@
 language: rust
+rust: nightly
 install: sudo apt-get install libpam0g-dev
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&

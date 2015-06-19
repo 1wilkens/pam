@@ -97,29 +97,24 @@ impl <'a> Authenticator<'a> {
         if res != PamReturnCode::SUCCESS {
             return self.fail(res);
         }
-        self.initialize_environment();
-        Ok(())
+
+        self.initialize_environment()
     }
 
     // Initialize the client environment with common variables.
     // Currently always called from Authenticator.open_session()
-    fn initialize_environment(&self) {
+    fn initialize_environment(&self) -> Result<(), PamReturnCode> {
         let user = users::get_user_by_name(self.credentials[0])
-            .expect("Could not get user by name!");
+            .expect(&format!("Could not get user by name: {:?}", self.credentials[0]));
 
-        let result = self.set_env("USER", &user.name)
+        self.set_env("USER", &user.name)
             .and(self.set_env("LOGNAME", &user.name))
             .and(self.set_env("HOME", &user.home_dir))
             .and(self.set_env("PWD", &user.home_dir))
             .and(self.set_env("SHELL", &user.shell))
             // Taken from https://github.com/gsingh93/display-manager/blob/master/pam.c
             // Should be a better way to get this. Revisit later.
-            .and(self.set_env("PATH", "$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin"));
-
-        if result.is_err() {
-            println!("Error while environment initialization!");
-            println!("pam_putenv returned: {}", result.unwrap_err());
-        }
+            .and(self.set_env("PATH", "$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin"))
     }
 
     // Utility function to set an environment variable in PAM and the process

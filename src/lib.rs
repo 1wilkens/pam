@@ -31,6 +31,7 @@ pub use simple::*;
 use pam::{PamConversation, PamFlag, PamHandle, PamReturnCode};
 
 /// Main struct to authenticate a user
+/// Currently closes the session on drop() but this might change!
 pub struct Authenticator<'a> {
     handle:         *mut PamHandle,
     credentials:    Box<[&'a str; 2]>
@@ -72,17 +73,17 @@ impl <'a> Authenticator<'a> {
 
         let mut res = unsafe { pam::authenticate(self.handle, PamFlag::NONE) };
         if res != success {
-            return self.fail(res);
+            return self.cleanup(res);
         }
 
         res = unsafe { pam::acct_mgmt(self.handle, PamFlag::NONE) };
         if res != success {
-            return self.fail(res);
+            return self.cleanup(res);
         }
 
         res = unsafe { pam::setcred(self.handle, PamFlag::ESTABLISH_CRED) };
         if res != success {
-            return self.fail(res);
+            return self.cleanup(res);
         }
         Ok(())
     }
@@ -95,7 +96,7 @@ impl <'a> Authenticator<'a> {
     pub fn open_session(&self) -> Result<(), PamReturnCode> {
         let res = unsafe { pam::open_session(self.handle, PamFlag::NONE) };
         if res != PamReturnCode::SUCCESS {
-            return self.fail(res);
+            return self.cleanup(res);
         }
 
         self.initialize_environment()
@@ -134,12 +135,21 @@ impl <'a> Authenticator<'a> {
     }
 
     // Utility function to properly clean up pam
-    // TODO: Move or copy this into Authenticator.drop()?
-    fn fail(&self, code: PamReturnCode) -> Result<(), PamReturnCode> {
+    fn cleanup(&self, code: PamReturnCode) -> Result<(), PamReturnCode> {
         unsafe {
+            // Currently the session is closed if PamReturnCode::SUCCESS is passed //TODO: change this
+            if code == PamReturnCode::SUCCESS {
+                pam::close_session(self.handle, PamFlag::NONE);
+            }
             pam::setcred(self.handle, pam::PamFlag::DELETE_CRED);
             pam::end(self.handle, 0);
         }
         Err(code)
+    }
+}
+
+impl <'a> Drop for Authenticator<'a> {
+    fn drop(&mut self) {
+        self.cleanup(PamReturnCode::SUCCESS);
     }
 }

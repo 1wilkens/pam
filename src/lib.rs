@@ -150,6 +150,6 @@ impl <'a> Authenticator<'a> {
 
 impl <'a> Drop for Authenticator<'a> {
     fn drop(&mut self) {
-        self.cleanup(PamReturnCode::SUCCESS);
+        let _ = self.cleanup(PamReturnCode::SUCCESS);
     }
 }

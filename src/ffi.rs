@@ -41,7 +41,7 @@ pub extern "C" fn converse(num_msg: c_int, msg: *mut *mut PamMessage,
             let m: &mut PamMessage = &mut **(msg.offset(i));
             let r: &mut PamResponse = &mut *((*resp).offset(i));
             // match on msg_style
-            match PamMessageStyle::from_i32(m.msg_style) {
+            match PamMessageStyle::from(m.msg_style) {
                 // assume username is requested
                 PamMessageStyle::PROMPT_ECHO_ON => {
                     strdup(data[0], &mut r.resp);

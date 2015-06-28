@@ -33,8 +33,13 @@ use pam::{PamConversation, PamFlag, PamHandle, PamReturnCode};
 /// Main struct to authenticate a user
 /// Currently closes the session on drop() but this might change!
 pub struct Authenticator<'a> {
-    handle:         *mut PamHandle,
-    credentials:    Box<[&'a str; 2]>
+    /// Flag indicating whether the Authenticator should close the session on drop
+    pub close_on_drop:  bool,
+    handle:             *mut PamHandle,
+    credentials:        Box<[&'a str; 2]>,
+    is_authenticated:   bool,
+    has_open_session:   bool,
+    last_code:          PamReturnCode
 }
 
 impl <'a> Authenticator<'a> {
@@ -50,55 +55,64 @@ impl <'a> Authenticator<'a> {
         };
         let mut handle: *mut PamHandle = ptr::null_mut();
 
-        match unsafe {
-            pam::start(CString::new(service).unwrap().as_ptr(), ptr::null(), &conv, &mut handle)
-        } {
+        match unsafe { pam::start(CString::new(service).unwrap().as_ptr(), ptr::null(), &conv, &mut handle) } {
             PamReturnCode::SUCCESS => Some(Authenticator {
-                handle:         handle,
-                credentials:    creds
+                close_on_drop:      true,
+                handle:             handle,
+                credentials:        creds,
+                is_authenticated:   false,
+                has_open_session:   false,
+                last_code:          PamReturnCode::SUCCESS
             }),
             _   => None
         }
     }
 
-    /// Set the credentials which should be used in the authentication process
+    /// Set the credentials which should be used in the authentication process.
+    /// Currently only username/password combinations are supported
     pub fn set_credentials(&mut self, user: &'a str, password: &'a str) {
         self.credentials[0] = user;
         self.credentials[1] = password;
     }
 
     /// Perform the authentication with the provided credentials
-    pub fn authenticate(&self) -> Result<(), PamReturnCode> {
+    pub fn authenticate(&mut self) -> Result<(), PamReturnCode> {
         let success = PamReturnCode::SUCCESS;
 
-        let mut res = unsafe { pam::authenticate(self.handle, PamFlag::NONE) };
-        if res != success {
-            return self.cleanup(res);
+        self.last_code = unsafe { pam::authenticate(self.handle, PamFlag::NONE) };
+        if self.last_code != success {
+            // No need to reset here
+            return Err(self.last_code);
+        }
+        self.is_authenticated = true;
+
+        self.last_code = unsafe { pam::acct_mgmt(self.handle, PamFlag::NONE) };
+        if self.last_code != success {
+            // Probably not strictly neccessary but better be sure
+            return self.reset();
         }
 
-        res = unsafe { pam::acct_mgmt(self.handle, PamFlag::NONE) };
-        if res != success {
-            return self.cleanup(res);
-        }
-
-        res = unsafe { pam::setcred(self.handle, PamFlag::ESTABLISH_CRED) };
-        if res != success {
-            return self.cleanup(res);
+        self.last_code = unsafe { pam::setcred(self.handle, PamFlag::ESTABLISH_CRED) };
+        if self.last_code != success {
+            return self.reset();
         }
         Ok(())
     }
 
     /// Open a session for a previously authenticated user and
     /// initialize the environment appropriately (in PAM and regular enviroment variables).
-    ///
-    /// Does not currently check for authentication and just calls the ffi method,
-    /// but clients should not rely on that.
-    pub fn open_session(&self) -> Result<(), PamReturnCode> {
-        let res = unsafe { pam::open_session(self.handle, PamFlag::NONE) };
-        if res != PamReturnCode::SUCCESS {
-            return self.cleanup(res);
+    pub fn open_session(&mut self) -> Result<(), PamReturnCode> {
+        if !self.is_authenticated {
+            //TODO: is this the right return code?
+            return Err(PamReturnCode::PERM_DENIED);
         }
 
+        self.last_code = unsafe { pam::open_session(self.handle, PamFlag::NONE) };
+        if self.last_code != PamReturnCode::SUCCESS {
+            return self.reset();
+        }
+
+        self.has_open_session = true;
         self.initialize_environment()
     }
 
@@ -134,22 +148,24 @@ impl <'a> Authenticator<'a> {
         }
     }
 
-    // Utility function to properly clean up pam
-    fn cleanup(&self, code: PamReturnCode) -> Result<(), PamReturnCode> {
+    // Utility function to reset the pam handle in case of intermediate errors
+    fn reset(&mut self) -> Result<(), PamReturnCode> {
         unsafe {
-            // Currently the session is closed if PamReturnCode::SUCCESS is passed //TODO: change this
-            if code == PamReturnCode::SUCCESS {
-                pam::close_session(self.handle, PamFlag::NONE);
-            }
-            pam::setcred(self.handle, pam::PamFlag::DELETE_CRED);
-            pam::end(self.handle, 0);
+            pam::setcred(self.handle, PamFlag::DELETE_CRED);
         }
-        Err(code)
+        self.is_authenticated = false;
+        Err(self.last_code)
     }
 }
 
 impl <'a> Drop for Authenticator<'a> {
     fn drop(&mut self) {
-        let _ = self.cleanup(PamReturnCode::SUCCESS);
+        unsafe {
+            if self.has_open_session && self.close_on_drop {
+                pam::close_session(self.handle, PamFlag::NONE);
+            }
+            let code = pam::setcred(self.handle, PamFlag::DELETE_CRED);
+            pam::end(self.handle, code);
+        }
     }
 }

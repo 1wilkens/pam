@@ -59,7 +59,7 @@ fn pam_fail(handle: *mut PamHandle, func: &str, res: PamReturnCode) -> bool {
     println!("{} returned: {:?}", func, res);
     unsafe {
         ::pam::setcred(handle, PamFlag::DELETE_CRED);
-        ::pam::end(handle, 0);
+        ::pam::end(handle, PamReturnCode::SUCCESS);
     }
     false
 }

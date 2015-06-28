@@ -5,6 +5,10 @@ Currently only supports basic username/password authentication.
 
 [Documentation @ gh-pages](https://mrfloya.github.io/pam-auth/)
 
+## Note about stability
+This crate follows [semantic versioning](http://semver.org). As such all versions below `1.0.0` should be
+considered development versions. This means the API could change any time.
+
 ## Usage
 1. Add `pam-auth` to your Cargo.toml:
 ```toml

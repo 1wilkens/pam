@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Added
+- Improve travis-ci integration to use container based builds
 
 ## [0.3.0] - 2015-12-08
 ### Added

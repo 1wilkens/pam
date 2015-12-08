@@ -1,23 +1,29 @@
 language: rust
 rust:
-    - stable
-    - beta
-    - nightly
+  - stable
+  - beta
+  - nightly
 matrix:
-    allow_failures:
-        - rust: nightly
-install: sudo apt-get install libpam0g-dev
-after_success: |
-  [ $TRAVIS_BRANCH = master ] &&
-  [ $TRAVIS_PULL_REQUEST = false ] &&
-  cargo doc &&
-  echo "<meta http-equiv=refresh content=0;url=pam_auth/index.html>" > target/doc/index.html &&
-  sudo pip install ghp-import &&
-  ghp-import -n target/doc &&
-  git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+  allow_failures:
+    - rust: nightly
+
+sudo: false
+addons:
+  apt:
+    packages:
+      - libpam0g-dev
+
+script:
+  - cargo build --release --verbose
+  - cargo test --verbose
+  - cargo doc --no-deps --verbose
+after_success:
+  - bash .travis-update-gh-pages.sh
+
 env:
   global:
-  - secure: Y8YiheT5gpy1mPip+bbKN+6nuGBLk2slsKGVUfO5AStBOR+7okigmdxFWFkEU/m4zGiuUrcNrDtlecw+ozRqd+S4hK2xFYt72t6eHmKc4drca4dW215794azzp3FETEV2ElFY9SK2XK3ahL+k9Nv8lhxEHiI4Kob6wqe3jw0DEI=
+    secure: Y8YiheT5gpy1mPip+bbKN+6nuGBLk2slsKGVUfO5AStBOR+7okigmdxFWFkEU/m4zGiuUrcNrDtlecw+ozRqd+S4hK2xFYt72t6eHmKc4drca4dW215794azzp3FETEV2ElFY9SK2XK3ahL+k9Nv8lhxEHiI4Kob6wqe3jw0DEI=
+
 notifications:
   email:
     on_success: never

@@ -20,6 +20,7 @@ if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [
 
   # Copy the freshly built contents
   cp -Rf $TRAVIS_BUILD_DIR/target/doc/* .
+  echo "<meta http-equiv=refresh content=0;url=pam_auth/index.html>" > index.html
 
   # add, commit and push files
   git add --all -f .

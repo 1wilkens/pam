@@ -7,7 +7,7 @@ description = "Safe Rust wrapper for PAM authentification"
 repository = "https://github.com/mrfloya/pam-auth"
 documentation = "http://mrfloya.github.io/pam-auth/index.html"
 readme = "README.md"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 libc    = "0.2.2"

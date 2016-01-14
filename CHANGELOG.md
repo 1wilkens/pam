@@ -12,8 +12,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
-### Added
-- Improve travis-ci integration to use container based builds
+
+## [0.3.1] - 2016-01-14
+### Changed
+- Relicensed to dual MIT/Apache-2.0
+- Improved travis-ci integration to use container based builds
 
 ## [0.3.0] - 2015-12-08
 ### Added
@@ -27,5 +30,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/mrfloya/pam-auth/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/mrfloya/pam-auth/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/mrfloya/pam-auth/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/mrfloya/pam-auth/compare/v0.2.0...v0.3.0

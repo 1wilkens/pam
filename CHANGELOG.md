@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Added
+- Added license badge to README.md
 
 ## [0.4.0] - 2016-04-11
 ## Changed

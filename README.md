@@ -1,4 +1,4 @@
-# pam-auth [![Version](https://img.shields.io/crates/v/pam-auth.svg)](https://crates.io/crates/pam-sys) [![Build Status](https://travis-ci.org/MrFloya/pam-auth.svg)](https://travis-ci.org/MrFloya/pam-auth)
+# pam-auth [![Version](https://img.shields.io/crates/v/pam-auth.svg)](https://crates.io/crates/pam-sys) [![License](https://img.shields.io/crates/l/pam-auth.svg?branch=master)](https://travis-ci.org/MrFloya/pam-auth) [![Build Status](https://travis-ci.org/MrFloya/pam-auth.svg)](https://travis-ci.org/MrFloya/pam-auth)
 
 Safe Rust bindings to Linux Pluggable Authentication Modules (PAM).
 Currently only supports basic username/password authentication.
@@ -6,7 +6,7 @@ Currently only supports basic username/password authentication.
 [Documentation @ gh-pages](https://mrfloya.github.io/pam-auth/)
 
 ## Supported Rust versions
-Currently builds against 1.5.0 and above.
+Currently builds against Rust 1.5.0 stable and above.
 
 ## Note about stability
 This crate follows [semantic versioning](http://semver.org). As such all versions below `1.0.0` should be

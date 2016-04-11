@@ -13,6 +13,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## Changed
+- Improved travis-ci integration to test against 1.5.0 and above
+- Updated `libc` dependency (0.2.2 -> 0.2.9)
+- Updated `pam-sys` dependency (0.3.0 -> 0.4.0)
+- Updated `users` dependency (0.4.4 -> 0.5.1)
+
 ## [0.3.1] - 2016-01-14
 ### Changed
 - Relicensed to dual MIT/Apache-2.0

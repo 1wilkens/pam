@@ -5,6 +5,9 @@ Currently only supports basic username/password authentication.
 
 [Documentation @ gh-pages](https://mrfloya.github.io/pam-auth/)
 
+## Supported Rust versions
+Currently builds against 1.5.0 and above.
+
 ## Note about stability
 This crate follows [semantic versioning](http://semver.org). As such all versions below `1.0.0` should be
 considered development versions. This means the API could change any time.
@@ -13,7 +16,7 @@ considered development versions. This means the API could change any time.
 1. Add `pam-auth` to your Cargo.toml:
 ```toml
 [dependencies]
-pam-auth = "0.2.0"
+pam-auth = "0.3.0"
 ```
 2. Use the `Authenticator` struct to authenticate and open a session
 ```rust

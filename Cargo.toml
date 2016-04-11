@@ -10,6 +10,6 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-libc    = "0.2.2"
-pam-sys = "0.3.0"
-users   = "0.4.4"
+libc    = "0.2.9"
+pam-sys = "0.4.0"
+users   = "0.5.1"

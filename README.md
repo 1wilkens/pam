@@ -16,7 +16,7 @@ considered development versions. This means the API could change any time.
 1. Add `pam-auth` to your Cargo.toml:
 ```toml
 [dependencies]
-pam-auth = "0.3.0"
+pam-auth = "0.4.0"
 ```
 2. Use the `Authenticator` struct to authenticate and open a session
 ```rust

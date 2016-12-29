@@ -24,6 +24,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fixed possibly undefined behaviour (taking a pointer of a dropped `CString`) in `Authenticator::new(..)`
 
+### Removed
+- Removed `.travis-update-gh-pages.sh` and obsolete rust versions from `.travis.yml`
+
 ## [0.4.0] - 2016-04-11
 ### Changed
 - Improved travis-ci integration to test against 1.5.0 and above

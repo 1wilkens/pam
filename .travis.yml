@@ -1,7 +1,6 @@
 language: rust
 rust:
   - 1.5.0
-  - 1.6.0
   - stable
   - beta
   - nightly
@@ -18,13 +17,6 @@ addons:
 script:
   - cargo build --release --verbose
   - cargo test --verbose
-  - cargo doc --no-deps --verbose
-after_success:
-  - bash .travis-update-gh-pages.sh
-
-env:
-  global:
-    secure: Y8YiheT5gpy1mPip+bbKN+6nuGBLk2slsKGVUfO5AStBOR+7okigmdxFWFkEU/m4zGiuUrcNrDtlecw+ozRqd+S4hK2xFYt72t6eHmKc4drca4dW215794azzp3FETEV2ElFY9SK2XK3ahL+k9Nv8lhxEHiI4Kob6wqe3jw0DEI=
 
 notifications:
   email:

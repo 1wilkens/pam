@@ -15,6 +15,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added license badge to README.md
 
+### Changed
+- Updated `libc` dependency (0.2.9 -> 0.2.18)
+- Updated `pam-sys` dependency (0.4.0 -> 0.4.1)
+- Updated `users` dependency (0.5.1 -> 0.5.2)
+
 ## [0.4.0] - 2016-04-11
 ## Changed
 - Improved travis-ci integration to test against 1.5.0 and above

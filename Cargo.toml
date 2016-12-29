@@ -5,7 +5,7 @@ version = "0.4.0"
 authors = ["Florian Wilkens <mrfloya_github@outlook.com>"]
 description = "Safe Rust wrapper for PAM authentification"
 repository = "https://github.com/mrfloya/pam-auth"
-documentation = "http://mrfloya.github.io/pam-auth/index.html"
+documentation = "https://docs.rs/pam-auth/"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 

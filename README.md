@@ -3,7 +3,7 @@
 Safe Rust bindings to Linux Pluggable Authentication Modules (PAM).
 Currently only supports basic username/password authentication.
 
-[Documentation @ gh-pages](https://mrfloya.github.io/pam-auth/)
+[Documentation @ docs.rs](https://docs.rs/pam-auth/)
 
 ## Supported Rust versions
 Currently builds against Rust 1.5.0 stable and above.

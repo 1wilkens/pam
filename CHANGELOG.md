@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `pam-sys` dependency (0.4.0 -> 0.4.1)
 - Updated `users` dependency (0.5.1 -> 0.5.2)
 - Moved call to `pam_setcred` from `Authenticator::authenticate()` to `Authenticator::open_session`
+- Moved documentation to [docs.rs](https://docs.rs/pam-auth/)
 
 ### Fixed
 - Fixed possibly undefined behaviour (taking a pointer of a dropped `CString`) in `Authenticator::new(..)`

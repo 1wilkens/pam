@@ -19,9 +19,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `libc` dependency (0.2.9 -> 0.2.18)
 - Updated `pam-sys` dependency (0.4.0 -> 0.4.1)
 - Updated `users` dependency (0.5.1 -> 0.5.2)
+- Moved call to `pam_setcred` from `Authenticator::authenticate()` to `Authenticator::open_session`
+
+### Fixed
+- Fixed possibly undefined behaviour (taking a pointer of a dropped `CString`) in `Authenticator::new(..)`
 
 ## [0.4.0] - 2016-04-11
-## Changed
+### Changed
 - Improved travis-ci integration to test against 1.5.0 and above
 - Updated `libc` dependency (0.2.2 -> 0.2.9)
 - Updated `pam-sys` dependency (0.3.0 -> 0.4.0)

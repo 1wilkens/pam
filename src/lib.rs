@@ -44,8 +44,9 @@ impl <'a> Authenticator<'a> {
             data_ptr:   creds.as_ptr() as *mut ::libc::c_void
         };
         let mut handle: *mut PamHandle = ptr::null_mut();
+        let service = CString::new(service).unwrap();
 
-        match unsafe { pam::start(CString::new(service).unwrap().as_ptr(), ptr::null(), &conv, &mut handle) } {
+        match unsafe { pam::start(service.as_ptr(), ptr::null(), &conv, &mut handle) } {
             PamReturnCode::SUCCESS => Some(Authenticator {
                 close_on_drop:      true,
                 handle:             handle,
@@ -67,23 +68,17 @@ impl <'a> Authenticator<'a> {
 
     /// Perform the authentication with the provided credentials
     pub fn authenticate(&mut self) -> Result<(), PamReturnCode> {
-        let success = PamReturnCode::SUCCESS;
-
         self.last_code = unsafe { pam::authenticate(self.handle, PamFlag::NONE) };
-        if self.last_code != success {
+        if self.last_code != PamReturnCode::SUCCESS {
             // No need to reset here
             return Err(self.last_code);
         }
+
         self.is_authenticated = true;
 
         self.last_code = unsafe { pam::acct_mgmt(self.handle, PamFlag::NONE) };
-        if self.last_code != success {
+        if self.last_code != PamReturnCode::SUCCESS {
             // Probably not strictly neccessary but better be sure
-            return self.reset();
-        }
-
-        self.last_code = unsafe { pam::setcred(self.handle, PamFlag::ESTABLISH_CRED) };
-        if self.last_code != success {
             return self.reset();
         }
         Ok(())
@@ -97,7 +92,18 @@ impl <'a> Authenticator<'a> {
             return Err(PamReturnCode::PERM_DENIED);
         }
 
+        self.last_code = unsafe { pam::setcred(self.handle, PamFlag::ESTABLISH_CRED) };
+        if self.last_code != PamReturnCode::SUCCESS {
+            return self.reset();
+        }
+
         self.last_code = unsafe { pam::open_session(self.handle, PamFlag::NONE) };
+        if self.last_code != PamReturnCode::SUCCESS {
+            return self.reset();
+        }
+
+        // Follow openSSH and call pam_setcred before and after open_session
+        self.last_code = unsafe { pam::setcred(self.handle, PamFlag::REINITIALIZE_CRED) };
         if self.last_code != PamReturnCode::SUCCESS {
             return self.reset();
         }

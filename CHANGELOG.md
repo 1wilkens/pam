@@ -12,12 +12,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+
+## [0.4.1] 2017-01-20
 ### Added
 - Added license badge to README.md
 
 ### Changed
-- Updated `libc` dependency (0.2.9 -> 0.2.18)
-- Updated `pam-sys` dependency (0.4.0 -> 0.4.1)
+- Updated `libc` dependency (0.2.9 -> 0.2.20)
+- Updated `pam-sys` dependency (0.4.0 -> 0.4.3)
 - Updated `users` dependency (0.5.1 -> 0.5.2)
 - Moved call to `pam_setcred` from `Authenticator::authenticate()` to `Authenticator::open_session`
 - Moved documentation to [docs.rs](https://docs.rs/pam-auth/)
@@ -52,7 +54,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.4.1...HEAD1
+[0.4.1]: https://github.com/1wilkens/pam-auth/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/1wilkens/pam-auth/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/1wilkens/pam-auth/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/1wilkens/pam-auth/compare/v0.2.0...v0.3.0

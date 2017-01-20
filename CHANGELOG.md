@@ -52,7 +52,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/mrfloya/pam-auth/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/mrfloya/pam-auth/compare/v0.3.1...v0.4.0
-[0.3.1]: https://github.com/mrfloya/pam-auth/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/mrfloya/pam-auth/compare/v0.2.0...v0.3.0
+[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/1wilkens/pam-auth/compare/v0.3.1...v0.4.0
+[0.3.1]: https://github.com/1wilkens/pam-auth/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/1wilkens/pam-auth/compare/v0.2.0...v0.3.0

@@ -22,7 +22,8 @@ pub fn login(service: &str, user: &str, password: &str) -> bool {
     let mut handle: *mut PamHandle = ptr::null_mut();
 
     let success = PamReturnCode::SUCCESS;
-    let mut res = unsafe { ::pam::start(CString::new(service).unwrap().as_ptr(), ptr::null(), &conv, &mut handle) };
+    let service_c = CString::new(service).unwrap();
+    let mut res = unsafe { ::pam::start(service_c.as_ptr(), ptr::null(), &conv, &mut handle) };
     if res != success {
         return pam_fail(handle, "pam_start", res);
     }

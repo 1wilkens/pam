@@ -120,8 +120,8 @@ impl <'a> Authenticator<'a> {
         let user = users::get_user_by_name(self.credentials[0])
             .expect(&format!("Could not get user by name: {:?}", self.credentials[0]));
 
-        self.set_env("USER", &user.name())
-            .and(self.set_env("LOGNAME", &user.name()))
+        self.set_env("USER", user.name())
+            .and(self.set_env("LOGNAME", user.name()))
             .and(self.set_env("HOME", user.home_dir().to_str().unwrap()))
             .and(self.set_env("PWD", user.home_dir().to_str().unwrap()))
             .and(self.set_env("SHELL", user.shell().to_str().unwrap()))

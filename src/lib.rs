@@ -24,15 +24,15 @@ use pam::{PamConversation, PamFlag, PamHandle, PamReturnCode};
 /// Currently closes the session on drop() but this might change!
 pub struct Authenticator<'a> {
     /// Flag indicating whether the Authenticator should close the session on drop
-    pub close_on_drop:  bool,
-    handle:             *mut PamHandle,
-    credentials:        Box<[&'a str; 2]>,
-    is_authenticated:   bool,
-    has_open_session:   bool,
-    last_code:          PamReturnCode
+    pub close_on_drop: bool,
+    handle: *mut PamHandle,
+    credentials: Box<[&'a str; 2]>,
+    is_authenticated: bool,
+    has_open_session: bool,
+    last_code: PamReturnCode,
 }
 
-impl <'a> Authenticator<'a> {
+impl<'a> Authenticator<'a> {
     /// Creates a new Authenticator with a given service name
     pub fn new(service: &str) -> Option<Authenticator> {
         use std::ffi::CString;
@@ -40,22 +40,24 @@ impl <'a> Authenticator<'a> {
 
         let creds = Box::new([""; 2]);
         let conv = PamConversation {
-            conv:       Some(ffi::converse),
-            data_ptr:   creds.as_ptr() as *mut ::libc::c_void
+            conv: Some(ffi::converse),
+            data_ptr: creds.as_ptr() as *mut ::libc::c_void,
         };
         let mut handle: *mut PamHandle = ptr::null_mut();
         let service = CString::new(service).unwrap();
 
         match unsafe { pam::start(service.as_ptr(), ptr::null(), &conv, &mut handle) } {
-            PamReturnCode::SUCCESS => Some(Authenticator {
-                close_on_drop:      true,
-                handle:             handle,
-                credentials:        creds,
-                is_authenticated:   false,
-                has_open_session:   false,
-                last_code:          PamReturnCode::SUCCESS
-            }),
-            _   => None
+            PamReturnCode::SUCCESS => {
+                Some(Authenticator {
+                    close_on_drop: true,
+                    handle: handle,
+                    credentials: creds,
+                    is_authenticated: false,
+                    has_open_session: false,
+                    last_code: PamReturnCode::SUCCESS,
+                })
+            }
+            _ => None,
         }
     }
 
@@ -115,7 +117,7 @@ impl <'a> Authenticator<'a> {
     // Initialize the client environment with common variables.
     // Currently always called from Authenticator.open_session()
     fn initialize_environment(&self) -> Result<(), PamReturnCode> {
-        use ::users::os::unix::UserExt;
+        use users::os::unix::UserExt;
 
         let user = users::get_user_by_name(self.credentials[0])
             .expect(&format!("Could not get user by name: {:?}", self.credentials[0]));
@@ -125,6 +127,7 @@ impl <'a> Authenticator<'a> {
             .and(self.set_env("HOME", user.home_dir().to_str().unwrap()))
             .and(self.set_env("PWD", user.home_dir().to_str().unwrap()))
             .and(self.set_env("SHELL", user.shell().to_str().unwrap()))
+            .and(self.set_env("MAIL", &format!("/var/spool/mail/{}", &user.name())))
             // Taken from https://github.com/gsingh93/display-manager/blob/master/pam.c
             // Should be a better way to get this. Revisit later.
             .and(self.set_env("PATH", "$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin"))
@@ -141,8 +144,8 @@ impl <'a> Authenticator<'a> {
         // Set pam environment variable
         let name_value = CString::new(format!("{}={}", key, value)).unwrap();
         match unsafe { pam::putenv(self.handle, name_value.as_ptr()) } {
-            PamReturnCode::SUCCESS  => Ok(()),
-            code                    => Err(code)
+            PamReturnCode::SUCCESS => Ok(()),
+            code => Err(code),
         }
     }
 
@@ -156,7 +159,7 @@ impl <'a> Authenticator<'a> {
     }
 }
 
-impl <'a> Drop for Authenticator<'a> {
+impl<'a> Drop for Authenticator<'a> {
     fn drop(&mut self) {
         unsafe {
             if self.has_open_session && self.close_on_drop {

@@ -15,9 +15,9 @@ pub fn login(service: &str, user: &str, password: &str) -> bool {
     use std::ptr;
 
     let creds: [&str; 2] = [user, password];
-    let conv = PamConversation{
+    let conv = PamConversation {
         conv: Some(::ffi::converse),
-        data_ptr: creds.as_ptr() as *mut ::libc::c_void
+        data_ptr: creds.as_ptr() as *mut ::libc::c_void,
     };
     let mut handle: *mut PamHandle = ptr::null_mut();
 

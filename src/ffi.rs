@@ -8,21 +8,25 @@
 use libc::{calloc, free, c_char, c_int, c_void, size_t};
 use pam::{PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
 
-pub extern "C" fn converse(num_msg: c_int, msg: *mut *mut PamMessage,
-    resp: *mut *mut PamResponse, appdata_ptr: *mut c_void) -> c_int {
+pub extern "C" fn converse(num_msg: c_int,
+                           msg: *mut *mut PamMessage,
+                           resp: *mut *mut PamResponse,
+                           appdata_ptr: *mut c_void)
+                           -> c_int {
     use std::ffi::CStr;
     use std::mem;
     use std::slice;
 
     unsafe {
         // allocate space for responses
-        *resp = calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse;
+        *resp = calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as
+                *mut PamResponse;
         if (*resp).is_null() {
             return PamReturnCode::BUF_ERR as c_int;
         }
     }
 
-    let data : &[&str] = unsafe { slice::from_raw_parts(appdata_ptr as *const &str, 2) };
+    let data: &[&str] = unsafe { slice::from_raw_parts(appdata_ptr as *const &str, 2) };
 
     let mut result: PamReturnCode = PamReturnCode::SUCCESS;
     for i in 0..num_msg as isize {
@@ -42,12 +46,12 @@ pub extern "C" fn converse(num_msg: c_int, msg: *mut *mut PamMessage,
                 }
                 // an error occured
                 PamMessageStyle::ERROR_MSG => {
-                    println!("PAM_ERROR_MSG: {}", String::from_utf8_lossy(CStr::from_ptr(m.msg).to_bytes())); //TODO: simplify this?
                     result = PamReturnCode::CONV_ERR;
                 }
                 // print the message to stdout
                 PamMessageStyle::TEXT_INFO => {
-                    println!("PAM_TEXT_INFO: {}", String::from_utf8_lossy(CStr::from_ptr(m.msg).to_bytes()));
+                    println!("PAM_TEXT_INFO: {}",
+                             String::from_utf8_lossy(CStr::from_ptr(m.msg).to_bytes()));
                 }
             }
         }
@@ -74,7 +78,7 @@ fn strdup(inp: &str, outp: &mut *mut c_char) {
     }
     let len_with_nul: usize = inp.bytes().len() + 1;
     unsafe {
-        *outp = calloc(mem::size_of::<c_char>() as usize, len_with_nul as usize) as *mut c_char;  // allocate memory
+        *outp = calloc(mem::size_of::<c_char>() as usize, len_with_nul as usize) as *mut c_char; // allocate memory
         ptr::copy_nonoverlapping(inp.as_ptr() as *const c_char, *outp, len_with_nul - 1); // copy string bytes
     }
 }

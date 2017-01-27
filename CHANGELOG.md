@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Added
+- Set `MAIL` environment variable to conventional `/var/spool/main/<user>`
 
 ## [0.4.1] 2017-01-20
 ### Added

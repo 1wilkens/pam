@@ -9,6 +9,9 @@ documentation = "https://docs.rs/pam-auth/"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 
+[badges]
+travis-ci = { repository = "1wilkens/pam-auth" }
+
 [dependencies]
 libc    = "0.2.20"
 pam-sys = "0.4.3"

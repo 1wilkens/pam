@@ -14,10 +14,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - Set `MAIL` environment variable to conventional `/var/spool/main/<user>`
+- Add travis-ci badge to `Cargo.toml`
 
 ## [0.4.1] 2017-01-20
 ### Added
-- Added license badge to README.md
+- Added license badge to `README.md`
 
 ### Changed
 - Updated `libc` dependency (0.2.9 -> 0.2.20)

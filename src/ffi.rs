@@ -1,4 +1,4 @@
-// Copyright 2015-2016 pam-auth Developers
+// Copyright 2015-2017 pam-auth Developers
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or

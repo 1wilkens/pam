@@ -15,6 +15,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Set `MAIL` environment variable to conventional `/var/spool/main/<user>`
 - Add travis-ci badge to `Cargo.toml`
+- Added custom error type `PamError` and result type
+
+### Changed
+- Moved `Authenticator` to its own module
 
 ## [0.4.1] 2017-01-20
 ### Added

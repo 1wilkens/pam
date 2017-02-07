@@ -111,6 +111,8 @@ impl<'a> Authenticator<'a> {
         let user = users::get_user_by_name(self.credentials[0])
             .expect(&format!("Could not get user by name: {:?}", self.credentials[0]));
 
+        // TODO: get pam_env and insert them into our process
+
         self.set_env("USER", user.name())
             .and(self.set_env("LOGNAME", user.name()))
             .and(self.set_env("HOME", user.home_dir().to_str().unwrap()))

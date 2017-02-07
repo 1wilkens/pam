@@ -5,7 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use libc::{calloc, free, c_char, c_int, c_void, size_t};
+use libc::{calloc, free, strdup, c_char, c_int, c_void, size_t};
 use pam::{PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
 
 pub extern "C" fn converse(num_msg: c_int,
@@ -38,11 +38,11 @@ pub extern "C" fn converse(num_msg: c_int,
             match PamMessageStyle::from(m.msg_style) {
                 // assume username is requested
                 PamMessageStyle::PROMPT_ECHO_ON => {
-                    strdup(data[0], &mut r.resp);
+                    r.resp = strdup(data[0].as_ptr() as *const c_char);
                 }
                 // assume password is requested
                 PamMessageStyle::PROMPT_ECHO_OFF => {
-                    strdup(data[1], &mut r.resp);
+                    r.resp = strdup(data[1].as_ptr() as *const c_char);
                 }
                 // an error occured
                 PamMessageStyle::ERROR_MSG => {
@@ -66,19 +66,4 @@ pub extern "C" fn converse(num_msg: c_int,
     }
 
     result as c_int
-}
-
-/// Dumb utility function mirroring glibc's strdup
-fn strdup(inp: &str, outp: &mut *mut c_char) {
-    use std::mem;
-    use std::ptr;
-
-    if !outp.is_null() {
-        panic!("Cannot copy &str to non null ptr!");
-    }
-    let len_with_nul: usize = inp.bytes().len() + 1;
-    unsafe {
-        *outp = calloc(mem::size_of::<c_char>() as usize, len_with_nul as usize) as *mut c_char; // allocate memory
-        ptr::copy_nonoverlapping(inp.as_ptr() as *const c_char, *outp, len_with_nul - 1); // copy string bytes
-    }
 }

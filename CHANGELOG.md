@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Moved `Authenticator` to its own module
+- Removed custom `strdup` function in `ffi` and replaced it with the `libc` version
 
 ## [0.4.1] 2017-01-20
 ### Added

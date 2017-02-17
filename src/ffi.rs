@@ -8,6 +8,10 @@
 use libc::{calloc, free, strdup, c_char, c_int, c_void, size_t};
 use pam::{PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
 
+use std::ffi::CStr;
+use std::mem;
+use std::slice;
+
 pub extern "C" fn converse(num_msg: c_int,
                            msg: *mut *mut PamMessage,
                            resp: *mut *mut PamResponse,

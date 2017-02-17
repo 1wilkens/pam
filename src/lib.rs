@@ -5,17 +5,14 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-// Crate dependencies
 extern crate libc;
 extern crate pam_sys as pam;
 extern crate users;
 
-// Modules
 mod authenticator;
 mod ffi;
 mod simple;
 
-// Re-Exports
 pub use authenticator::*;
 pub use simple::*;
 

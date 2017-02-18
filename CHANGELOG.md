@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+
+## [0.5.0] - 2017-02-18
 ### Added
 - Add travis-ci badge to `Cargo.toml`
 - Added custom error type `PamError` and result type
@@ -66,7 +68,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.4.1...HEAD1
+[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/1wilkens/pam-auth/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/1wilkens/pam-auth/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/1wilkens/pam-auth/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/1wilkens/pam-auth/compare/v0.3.0...v0.3.1

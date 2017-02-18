@@ -38,7 +38,6 @@ impl PamEnvList {
 
                 if split.len() == 2 {
                     // Only add valid env vars (contain at least one '=')
-                    println!("env: {} = {}", split[0], split[1]);
                     vec.push((split[0].into(), split[1].into()));
                 }
             }

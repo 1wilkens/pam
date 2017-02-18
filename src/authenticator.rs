@@ -36,7 +36,6 @@ impl<'a, 'b> Authenticator<'a, 'b> {
 
         match pam::start(service, None, &conv, &mut handle) {
             PamReturnCode::SUCCESS => unsafe {
-                println!("handle: {:p}", handle);
                 Some(Authenticator {
                     close_on_drop: true,
                     handle: handle.as_mut().unwrap(),
@@ -109,7 +108,6 @@ impl<'a, 'b> Authenticator<'a, 'b> {
         use users::os::unix::UserExt;
         use std::env;
 
-        println!("Copying PAM environment");
         // Set PAM environment in the local process
         if let Some(mut env_list) = ::env::get_pam_env(self.handle) {
             let env = env_list.to_vec();
@@ -117,7 +115,6 @@ impl<'a, 'b> Authenticator<'a, 'b> {
                 env::set_var(&key, &value);
             }
         }
-        println!("Copied PAM environment");
 
         let user = users::get_user_by_name(self.credentials[0])
             .expect(&format!("Could not get user by name: {:?}", self.credentials[0]));

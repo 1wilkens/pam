@@ -13,13 +13,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Set `MAIL` environment variable to conventional `/var/spool/main/<user>`
 - Add travis-ci badge to `Cargo.toml`
 - Added custom error type `PamError` and result type
+- Added `env` module for PAM environment modules
 
 ### Changed
 - Moved `Authenticator` to its own module
 - Removed custom `strdup` function in `ffi` and replaced it with the `libc` version
+- Tracked `pam-sys`
+    - Use of Rust types where applicable
+    - Removal of obsolete `unsafe` blocks
+- Changed `Authenticator::open_session` to also insert the PAM environment variables into the process environment
 
 ## [0.4.1] 2017-01-20
 ### Added

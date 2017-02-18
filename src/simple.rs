@@ -5,8 +5,6 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use std::ffi::CString;
-
 use pam::{PamConversation, PamHandle, PamFlag, PamReturnCode};
 
 /// #[Deprecated]
@@ -22,35 +20,32 @@ pub fn login(service: &str, user: &str, password: &str) -> bool {
     let mut handle: *mut PamHandle = ptr::null_mut();
 
     let success = PamReturnCode::SUCCESS;
-    let service_c = CString::new(service).unwrap();
-    let mut res = unsafe { ::pam::start(service_c.as_ptr(), ptr::null(), &conv, &mut handle) };
+    let mut res = ::pam::start(service, None, &conv, &mut handle);
     if res != success {
-        return pam_fail(handle, "pam_start", res);
+        return false;
     }
-    res = unsafe { ::pam::authenticate(handle, PamFlag::NONE) };
+    let mut handle: &mut PamHandle = unsafe { handle.as_mut().unwrap() };
+    res = ::pam::authenticate(handle, PamFlag::NONE);
     if res != success {
-        return pam_fail(handle, "pam_authenticate", res);
+        return pam_fail(handle);
     }
-    res = unsafe { ::pam::acct_mgmt(handle, PamFlag::NONE) };
+    res = ::pam::acct_mgmt(handle, PamFlag::NONE);
     if res != success {
-        return pam_fail(handle, "pam_acct_mgmt", res);
+        return pam_fail(handle);
     }
-    res = unsafe { ::pam::setcred(handle, PamFlag::ESTABLISH_CRED) };
+    res = ::pam::setcred(handle, PamFlag::ESTABLISH_CRED);
     if res != success {
-        return pam_fail(handle, "pam_setcred", res);
+        return pam_fail(handle);
     }
-    res = unsafe { ::pam::open_session(handle, PamFlag::NONE) };
+    res = ::pam::open_session(handle, PamFlag::NONE);
     if res != success {
-        return pam_fail(handle, "pam_open_session", res);
+        return pam_fail(handle);
     }
     true
 }
 
-fn pam_fail(handle: *mut PamHandle, func: &str, res: PamReturnCode) -> bool {
-    println!("{} returned: {:?}", func, res);
-    unsafe {
-        ::pam::setcred(handle, PamFlag::DELETE_CRED);
-        ::pam::end(handle, PamReturnCode::SUCCESS);
-    }
+fn pam_fail(handle: &mut PamHandle) -> bool {
+    ::pam::setcred(handle, PamFlag::DELETE_CRED);
+    ::pam::end(handle, PamReturnCode::SUCCESS);
     false
 }

@@ -10,6 +10,7 @@ extern crate pam_sys as pam;
 extern crate users;
 
 mod authenticator;
+mod env;
 mod ffi;
 mod simple;
 

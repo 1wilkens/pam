@@ -17,10 +17,6 @@ pub extern "C" fn converse(num_msg: c_int,
                            resp: *mut *mut PamResponse,
                            appdata_ptr: *mut c_void)
                            -> c_int {
-    use std::ffi::CStr;
-    use std::mem;
-    use std::slice;
-
     unsafe {
         // allocate space for responses
         *resp = calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as

@@ -13,6 +13,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.1] - 2017-05-25
+### Fixed
+- Removed use of unstable feature `ptr_as_ref` to build on 1.5.0 again
+
 ## [0.5.0] - 2017-02-18
 ### Added
 - Add travis-ci badge to `Cargo.toml`

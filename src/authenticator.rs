@@ -38,7 +38,7 @@ impl<'a, 'b> Authenticator<'a, 'b> {
             PamReturnCode::SUCCESS => unsafe {
                 Some(Authenticator {
                     close_on_drop: true,
-                    handle: handle.as_mut().unwrap(),
+                    handle: &mut *handle,
                     credentials: creds,
                     is_authenticated: false,
                     has_open_session: false,

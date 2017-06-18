@@ -8,7 +8,7 @@
 use libc::{calloc, free, strdup, c_char, c_int, c_void, size_t};
 use pam::{PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
 
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::mem;
 use std::slice;
 
@@ -38,11 +38,19 @@ pub extern "C" fn converse(num_msg: c_int,
             match PamMessageStyle::from(m.msg_style) {
                 // assume username is requested
                 PamMessageStyle::PROMPT_ECHO_ON => {
-                    r.resp = strdup(data[0].as_ptr() as *const c_char);
+                    if let Ok(username) = CString::new(data[0]) {
+                        r.resp = strdup(username.as_ptr() as *const c_char);
+                    } else {
+                        result = PamReturnCode::CONV_ERR;
+                    }
                 }
                 // assume password is requested
                 PamMessageStyle::PROMPT_ECHO_OFF => {
-                    r.resp = strdup(data[1].as_ptr() as *const c_char);
+                    if let Ok(password) = CString::new(data[1]) {
+                        r.resp = strdup(password.as_ptr() as *const c_char);
+                    } else {
+                        result = PamReturnCode::CONV_ERR;
+                    }
                 }
                 // an error occured
                 PamMessageStyle::ERROR_MSG => {

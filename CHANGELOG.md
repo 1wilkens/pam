@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Only provide official support for Rust stable, beta and nightly (mainly through travis)
 - Updated `libc` dependency (0.2.20 -> 0.2.33)
 - Updated `pam-sys` dependency (0.5.3 -> 0.5.4)
+- Addded `cache: cargo` directive to speedup CI
 
 ## [0.5.2] - 2017-06-19
 ### Fixed

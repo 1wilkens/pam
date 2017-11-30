@@ -53,6 +53,6 @@ impl PamEnvList {
 
 impl Drop for PamEnvList {
     fn drop(&mut self) {
-        unsafe { pam::misc_drop_env(self.ptr) };
+        unsafe { pam::raw::pam_misc_drop_env(self.ptr as *mut *mut i8) };
     }
 }

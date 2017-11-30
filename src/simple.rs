@@ -24,7 +24,7 @@ pub fn login(service: &str, user: &str, password: &str) -> bool {
     if res != success {
         return false;
     }
-    let mut handle: &mut PamHandle = unsafe {&mut *handle };
+    let handle: &mut PamHandle = unsafe {&mut *handle };
     res = ::pam::authenticate(handle, PamFlag::NONE);
     if res != success {
         return pam_fail(handle);

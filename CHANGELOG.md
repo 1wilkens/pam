@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+
+## [0.5.3] - 2017-12-04
 ### Changed
 - Only provide official support for Rust stable, beta and nightly (mainly through travis)
 - Updated `libc` dependency (0.2.20 -> 0.2.33)
@@ -81,7 +83,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/1wilkens/pam-auth/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/1wilkens/pam-auth/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/1wilkens/pam-auth/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/1wilkens/pam-auth/compare/v0.4.1...v0.5.0

@@ -51,8 +51,9 @@ impl PamEnvList {
     }
 }
 
+#[cfg(target_os = "linux")]
 impl Drop for PamEnvList {
     fn drop(&mut self) {
-        unsafe { pam::raw::pam_misc_drop_env(self.ptr as *mut *mut i8) };
+        unsafe { pam::raw::pam_misc_drop_env(self.ptr as *mut *mut c_char) };
     }
 }

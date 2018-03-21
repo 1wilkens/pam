@@ -12,6 +12,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Changed
+- Updated `libc` dependency (0.2.33 -> 0.2.39)
+- Updated `pam-sys` dependency (0.5.4 -> 0.5.5)
+- Updated `users` dependency (0.5.2 -> 0.5.3)
+
+### Fixed
+- Fix build on OSX and linux-arm
 
 ## [0.5.3] - 2017-12-04
 ### Changed

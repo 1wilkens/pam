@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+
+## [0.5.4] - 2018-03-21
 ### Changed
 - Updated `libc` dependency (0.2.33 -> 0.2.39)
 - Updated `pam-sys` dependency (0.5.4 -> 0.5.5)
@@ -90,7 +92,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.5.4...HEAD
+[0.5.3]: https://github.com/1wilkens/pam-auth/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/1wilkens/pam-auth/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/1wilkens/pam-auth/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/1wilkens/pam-auth/compare/v0.5.0...v0.5.1

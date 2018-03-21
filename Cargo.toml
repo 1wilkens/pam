@@ -1,7 +1,7 @@
 [package]
 
 name = "pam-auth"
-version = "0.5.3"
+version = "0.5.4"
 authors = ["Florian Wilkens <gh@1wilkens.org>"]
 description = "Safe Rust wrapper for PAM authentification"
 repository = "https://github.com/1wilkens/pam-auth"

@@ -19,3 +19,6 @@ travis-ci = { repository = "1wilkens/pam-auth" }
 libc    = "^0.2"
 pam-sys = "^0.5"
 users   = "^0.8"
+
+[dev-dependencies]
+rpassword = "2.0"

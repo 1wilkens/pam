@@ -1,53 +1,78 @@
-use libc::c_void;
-use pam::{self, PamConversation, PamFlag, PamHandle, PamReturnCode};
+use pam::{self, PamFlag, PamHandle, PamReturnCode};
 use users;
 
 use std::{env, ptr};
 
-use crate::{env::get_pam_env, ffi, PamResult};
+use crate::{env::get_pam_env, ffi, PamResult, Converse, PamError, PasswordConv};
 
 /// Main struct to authenticate a user
-/// Currently closes the session on drop() but this might change!
-pub struct Authenticator<'a, 'b> {
+/// 
+/// You need to create an instance of it to start an authentication process. If you
+/// want a simple password-based authentication, you can use `Authenticator::with_password`,
+/// and to the following flow:
+///
+/// ```no_run
+/// use pam_auth::Authenticator;
+///
+/// let mut authenticator = Authenticator::with_password("system-auth")
+///         .expect("Failed to init PAM client.");
+/// // Preset the login & password we will use for authentication
+/// authenticator.get_handler().set_credentials("login", "password");
+/// // actually try to authenticate:
+/// authenticator.authenticate().expect("Authentication failed!");
+/// // Now that we are authenticated, it's possible to open a sesssion:
+/// authenticator.open_session().expect("Failed to open a session!");
+/// ```
+///
+/// If you wish to customise the PAM conversation function, you should rather create your
+/// authenticator with `Authenticator::with_handler`, providing a struct implementing the
+/// `Converse` trait. You can then mutably access your conversation handler using the
+/// `Authenticator::get_handler` method.
+///
+/// By default, the `Authenticator` will close any opened session when dropped. If you don't
+/// want this, you can change its `close_on_drop` field to `False`.
+pub struct Authenticator<'a, C: Converse> {
     /// Flag indicating whether the Authenticator should close the session on drop
     pub close_on_drop: bool,
     handle: &'a mut PamHandle,
-    credentials: Box<[&'b str; 2]>,
+    converse: Box<C>,
     is_authenticated: bool,
     has_open_session: bool,
     last_code: PamReturnCode,
 }
 
-impl<'a, 'b> Authenticator<'a, 'b> {
-    /// Creates a new Authenticator with a given service name
-    pub fn new(service: &str) -> Option<Authenticator> {
-        let creds = Box::new([""; 2]);
-        let conv = PamConversation {
-            conv: Some(ffi::converse),
-            data_ptr: creds.as_ptr() as *mut c_void,
-        };
+impl<'a> Authenticator<'a, PasswordConv> {
+    /// Create a new `Authenticator` with a given service name and a password-based conversation
+    pub fn with_password(service: &str) -> PamResult<Authenticator<'a, PasswordConv>> {
+        Authenticator::with_handler(service, PasswordConv::new())
+    }
+}
+
+impl<'a, C: Converse> Authenticator<'a, C> {
+    /// Creates a new Authenticator with a given service name and conversation callback
+    pub fn with_handler(service: &str, converse: C) -> PamResult<Authenticator<'a, C>> {
+        let mut converse = Box::new(converse);
+        let conv = ffi::make_conversation(&mut *converse);
         let mut handle: *mut PamHandle = ptr::null_mut();
 
         match pam::start(service, None, &conv, &mut handle) {
             PamReturnCode::SUCCESS => unsafe {
-                Some(Authenticator {
+                Ok(Authenticator {
                     close_on_drop: true,
                     handle: &mut *handle,
-                    credentials: creds,
+                    converse,
                     is_authenticated: false,
                     has_open_session: false,
                     last_code: PamReturnCode::SUCCESS,
                 })
             },
-            _ => None,
+            code => Err(PamError(code)),
         }
     }
 
-    /// Set the credentials which should be used in the authentication process.
-    /// Currently only username/password combinations are supported
-    pub fn set_credentials(&mut self, user: &'b str, password: &'b str) {
-        self.credentials[0] = user;
-        self.credentials[1] = password;
+    /// Access the conversation handler of this Authenticator
+    pub fn get_handler(&mut self) -> &mut C {
+        &mut *self.converse
     }
 
     /// Perform the authentication with the provided credentials
@@ -109,10 +134,8 @@ impl<'a, 'b> Authenticator<'a, 'b> {
             }
         }
 
-        let user = users::get_user_by_name(self.credentials[0]).expect(&format!(
-            "Could not get user by name: {:?}",
-            self.credentials[0]
-        ));
+        let user = users::get_user_by_name(self.converse.username())
+            .unwrap_or_else(|| panic!("Could not get user by name: {:?}", self.converse.username()));
 
         // Set some common environment variables
         self.set_env(
@@ -162,7 +185,7 @@ impl<'a, 'b> Authenticator<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Drop for Authenticator<'a, 'b> {
+impl<'a, C: Converse> Drop for Authenticator<'a, C> {
     fn drop(&mut self) {
         if self.has_open_session && self.close_on_drop {
             pam::close_session(self.handle, PamFlag::NONE);

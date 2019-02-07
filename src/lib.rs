@@ -3,10 +3,8 @@ extern crate pam_sys as pam;
 mod authenticator;
 mod env;
 mod ffi;
-mod simple;
 
 pub use crate::authenticator::*;
-pub use crate::simple::*;
 
 pub struct PamError(pam::PamReturnCode);
 pub type PamResult<T> = std::result::Result<T, PamError>;

@@ -15,16 +15,15 @@ use std::slice;
 pub extern "C" fn converse(
     num_msg: c_int,
     msg: *mut *mut PamMessage,
-    resp: *mut *mut PamResponse,
+    out_resp: *mut *mut PamResponse,
     appdata_ptr: *mut c_void,
 ) -> c_int {
-    unsafe {
         // allocate space for responses
-        *resp =
-            calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse;
-        if (*resp).is_null() {
-            return PamReturnCode::BUF_ERR as c_int;
-        }
+    let resp = unsafe {
+        calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse
+    };
+    if resp.is_null() {
+        return PamReturnCode::BUF_ERR as c_int;
     }
 
     let data: &[&str] = unsafe { slice::from_raw_parts(appdata_ptr as *const &str, 2) };
@@ -34,7 +33,7 @@ pub extern "C" fn converse(
         unsafe {
             // get indexed values
             let m: &mut PamMessage = &mut **(msg.offset(i));
-            let r: &mut PamResponse = &mut *((*resp).offset(i));
+            let r: &mut PamResponse = &mut *(resp.offset(i));
             // match on msg_style
             match PamMessageStyle::from(m.msg_style) {
                 // assume username is requested
@@ -73,7 +72,9 @@ pub extern "C" fn converse(
 
     // free allocated memory if an error occured
     if result != PamReturnCode::SUCCESS {
-        unsafe { free(*resp as *mut c_void) };
+        unsafe { free(resp as *mut c_void) };
+    } else {
+        unsafe { *out_resp = resp };
     }
 
     result as c_int

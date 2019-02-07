@@ -10,10 +10,12 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 categories = ["authentication"]
 
+edition = "2018"
+
 [badges]
 travis-ci = { repository = "1wilkens/pam-auth" }
 
 [dependencies]
-libc    = "0.2.42"
-pam-sys = "0.5.6"
-users   = "0.5.3"
+libc    = "^0.2"
+pam-sys = "^0.5"
+users   = "^0.8"

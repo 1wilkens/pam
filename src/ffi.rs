@@ -5,22 +5,23 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use libc::{calloc, free, strdup, c_char, c_int, c_void, size_t};
+use libc::{c_char, c_int, c_void, calloc, free, size_t, strdup};
 use pam::{PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
 
 use std::ffi::{CStr, CString};
 use std::mem;
 use std::slice;
 
-pub extern "C" fn converse(num_msg: c_int,
-                           msg: *mut *mut PamMessage,
-                           resp: *mut *mut PamResponse,
-                           appdata_ptr: *mut c_void)
-                           -> c_int {
+pub extern "C" fn converse(
+    num_msg: c_int,
+    msg: *mut *mut PamMessage,
+    resp: *mut *mut PamResponse,
+    appdata_ptr: *mut c_void,
+) -> c_int {
     unsafe {
         // allocate space for responses
-        *resp = calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as
-                *mut PamResponse;
+        *resp =
+            calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse;
         if (*resp).is_null() {
             return PamReturnCode::BUF_ERR as c_int;
         }
@@ -58,8 +59,10 @@ pub extern "C" fn converse(num_msg: c_int,
                 }
                 // print the message to stdout
                 PamMessageStyle::TEXT_INFO => {
-                    println!("PAM_TEXT_INFO: {}",
-                             String::from_utf8_lossy(CStr::from_ptr(m.msg).to_bytes()));
+                    println!(
+                        "PAM_TEXT_INFO: {}",
+                        String::from_utf8_lossy(CStr::from_ptr(m.msg).to_bytes())
+                    );
                 }
             }
         }

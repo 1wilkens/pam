@@ -5,20 +5,18 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-extern crate libc;
 extern crate pam_sys as pam;
-extern crate users;
 
 mod authenticator;
 mod env;
 mod ffi;
 mod simple;
 
-pub use authenticator::*;
-pub use simple::*;
+pub use crate::authenticator::*;
+pub use crate::simple::*;
 
 pub struct PamError(pam::PamReturnCode);
-pub type Result<T> = std::result::Result<T, PamError>;
+pub type PamResult<T> = std::result::Result<T, PamError>;
 
 impl std::fmt::Debug for PamError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {

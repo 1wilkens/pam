@@ -5,8 +5,8 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use libc::{c_char};
-use pam;
+use libc::c_char;
+use pam::{self, PamHandle};
 
 use std::ffi::CStr;
 
@@ -14,7 +14,7 @@ pub struct PamEnvList {
     ptr: *const *const c_char,
 }
 
-pub fn get_pam_env(handle: &mut pam::PamHandle) -> Option<PamEnvList> {
+pub fn get_pam_env(handle: &mut PamHandle) -> Option<PamEnvList> {
     let env = pam::getenvlist(handle);
     if !env.is_null() {
         Some(PamEnvList { ptr: env })
@@ -30,7 +30,7 @@ impl PamEnvList {
         let mut idx = 0;
         loop {
             let env_ptr: *const *const c_char = unsafe { self.ptr.offset(idx) };
-            if unsafe { !(*env_ptr).is_null() }{
+            if unsafe { !(*env_ptr).is_null() } {
                 idx += 1;
 
                 let env = unsafe { CStr::from_ptr(*env_ptr) }.to_string_lossy();
@@ -40,8 +40,7 @@ impl PamEnvList {
                     // Only add valid env vars (contain at least one '=')
                     vec.push((split[0].into(), split[1].into()));
                 }
-            }
-            else {
+            } else {
                 // Reached the end of the env array -> break out of the loop
                 break;
             }

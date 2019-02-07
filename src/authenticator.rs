@@ -5,10 +5,13 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use ffi;
-
+use libc::c_void;
 use pam::{self, PamConversation, PamFlag, PamHandle, PamReturnCode};
 use users;
+
+use std::{env, ptr};
+
+use crate::{env::get_pam_env, ffi, PamResult};
 
 /// Main struct to authenticate a user
 /// Currently closes the session on drop() but this might change!
@@ -25,12 +28,10 @@ pub struct Authenticator<'a, 'b> {
 impl<'a, 'b> Authenticator<'a, 'b> {
     /// Creates a new Authenticator with a given service name
     pub fn new(service: &str) -> Option<Authenticator> {
-        use std::ptr;
-
         let creds = Box::new([""; 2]);
         let conv = PamConversation {
             conv: Some(ffi::converse),
-            data_ptr: creds.as_ptr() as *mut ::libc::c_void,
+            data_ptr: creds.as_ptr() as *mut c_void,
         };
         let mut handle: *mut PamHandle = ptr::null_mut();
 
@@ -57,7 +58,7 @@ impl<'a, 'b> Authenticator<'a, 'b> {
     }
 
     /// Perform the authentication with the provided credentials
-    pub fn authenticate(&mut self) -> ::Result<()> {
+    pub fn authenticate(&mut self) -> PamResult<()> {
         self.last_code = pam::authenticate(self.handle, PamFlag::NONE);
         if self.last_code != PamReturnCode::SUCCESS {
             // No need to reset here
@@ -76,10 +77,10 @@ impl<'a, 'b> Authenticator<'a, 'b> {
 
     /// Open a session for a previously authenticated user and
     /// initialize the environment appropriately (in PAM and regular enviroment variables).
-    pub fn open_session(&mut self) -> ::Result<()> {
+    pub fn open_session(&mut self) -> PamResult<()> {
         if !self.is_authenticated {
             //TODO: is this the right return code?
-            return Err(From::from(PamReturnCode::PERM_DENIED));
+            return Err(PamReturnCode::PERM_DENIED.into());
         }
 
         self.last_code = pam::setcred(self.handle, PamFlag::ESTABLISH_CRED);
@@ -104,38 +105,47 @@ impl<'a, 'b> Authenticator<'a, 'b> {
 
     // Initialize the client environment with common variables.
     // Currently always called from Authenticator.open_session()
-    fn initialize_environment(&mut self) -> ::Result<()> {
+    fn initialize_environment(&mut self) -> PamResult<()> {
         use users::os::unix::UserExt;
-        use std::env;
 
         // Set PAM environment in the local process
-        if let Some(mut env_list) = ::env::get_pam_env(self.handle) {
+        if let Some(mut env_list) = get_pam_env(self.handle) {
             let env = env_list.to_vec();
             for (key, value) in env {
                 env::set_var(&key, &value);
             }
         }
 
-        let user = users::get_user_by_name(self.credentials[0])
-            .expect(&format!("Could not get user by name: {:?}", self.credentials[0]));
+        let user = users::get_user_by_name(self.credentials[0]).expect(&format!(
+            "Could not get user by name: {:?}",
+            self.credentials[0]
+        ));
 
         // Set some common environment variables
-        try!(self.set_env("USER", user.name()));
-        try!(self.set_env("LOGNAME", user.name()));
-        try!(self.set_env("HOME", user.home_dir().to_str().unwrap()));
-        try!(self.set_env("PWD", user.home_dir().to_str().unwrap()));
-        try!(self.set_env("SHELL", user.shell().to_str().unwrap()));
+        self.set_env(
+            "USER",
+            user.name()
+                .to_str()
+                .expect("Unix usernames should be valid UTF-8"),
+        )?;
+        self.set_env(
+            "LOGNAME",
+            user.name()
+                .to_str()
+                .expect("Unix usernames should be valid UTF-8"),
+        )?;
+        self.set_env("HOME", user.home_dir().to_str().unwrap())?;
+        self.set_env("PWD", user.home_dir().to_str().unwrap())?;
+        self.set_env("SHELL", user.shell().to_str().unwrap())?;
         // Taken from https://github.com/gsingh93/display-manager/blob/master/pam.c
         // Should be a better way to get this. Revisit later.
-        try!(self.set_env("PATH", "$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin"));
+        self.set_env("PATH", "$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin")?;
 
         Ok(())
     }
 
     // Utility function to set an environment variable in PAM and the process
-    fn set_env(&mut self, key: &str, value: &str) -> ::Result<()> {
-        use std::env;
-
+    fn set_env(&mut self, key: &str, value: &str) -> PamResult<()> {
         // Set regular environment variable
         env::set_var(key, value);
 
@@ -152,7 +162,7 @@ impl<'a, 'b> Authenticator<'a, 'b> {
     }
 
     // Utility function to reset the pam handle in case of intermediate errors
-    fn reset(&mut self) -> ::Result<()> {
+    fn reset(&mut self) -> PamResult<()> {
         pam::setcred(self.handle, PamFlag::DELETE_CRED);
         self.is_authenticated = false;
         Err(From::from(self.last_code))

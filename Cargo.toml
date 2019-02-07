@@ -1,21 +1,17 @@
 [package]
 
 name = "pam-auth"
-version = "0.5.5"
+version = "0.6.0"
 authors = ["Florian Wilkens <gh@1wilkens.org>"]
-description = "Safe Rust wrapper for PAM authentification"
-repository = "https://github.com/1wilkens/pam-auth"
+description = "[MOVED TO `pam`] Safe Rust wrapper for PAM authentification"
+repository = "https://github.com/1wilkens/pam-auth/tree/deprecated/README.md"
 documentation = "https://docs.rs/pam-auth/"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 categories = ["authentication"]
 
 edition = "2018"
+build = "build.rs"
 
 [badges]
 travis-ci = { repository = "1wilkens/pam-auth" }
-
-[dependencies]
-libc    = "^0.2"
-pam-sys = "^0.5"
-users   = "^0.8"

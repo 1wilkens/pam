@@ -1,3 +1,7 @@
+# [MOVED TO `pam`]
+`pam-auth` is deprecated and was renamed to [`pam`](https://crates.io/crates/pam).
+Please use the new crate for any future projects and consider switching if you still use this crate.
+
 # pam-auth [![Version](https://img.shields.io/crates/v/pam-auth.svg)](https://crates.io/crates/pam-sys) [![License](https://img.shields.io/crates/l/pam-auth.svg?branch=master)](https://travis-ci.org/1wilkens/pam-auth) [![Build Status](https://travis-ci.org/1wilkens/pam-auth.svg)](https://travis-ci.org/1wilkens/pam-auth)
 
 Safe Rust bindings to Linux Pluggable Authentication Modules (PAM).

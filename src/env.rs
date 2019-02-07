@@ -1,5 +1,5 @@
 use libc::c_char;
-use pam::{self, PamHandle};
+use pam_sys::{getenvlist, raw, PamHandle};
 
 use std::ffi::CStr;
 
@@ -8,7 +8,7 @@ pub struct PamEnvList {
 }
 
 pub fn get_pam_env(handle: &mut PamHandle) -> Option<PamEnvList> {
-    let env = pam::getenvlist(handle);
+    let env = getenvlist(handle);
     if !env.is_null() {
         Some(PamEnvList { ptr: env })
     } else {
@@ -46,6 +46,6 @@ impl PamEnvList {
 #[cfg(target_os = "linux")]
 impl Drop for PamEnvList {
     fn drop(&mut self) {
-        unsafe { pam::raw::pam_misc_drop_env(self.ptr as *mut *mut c_char) };
+        unsafe { raw::pam_misc_drop_env(self.ptr as *mut *mut c_char) };
     }
 }

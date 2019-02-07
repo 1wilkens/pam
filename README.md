@@ -1,9 +1,9 @@
-# pam-auth [![Version](https://img.shields.io/crates/v/pam-auth.svg)](https://crates.io/crates/pam-sys) [![License](https://img.shields.io/crates/l/pam-auth.svg?branch=master)](https://travis-ci.org/1wilkens/pam-auth) [![Build Status](https://travis-ci.org/1wilkens/pam-auth.svg)](https://travis-ci.org/1wilkens/pam-auth)
+# pam [![Version](https://img.shields.io/crates/v/pam.svg)](https://crates.io/crates/pam) [![License](https://img.shields.io/crates/l/pam.svg?branch=master)](https://travis-ci.org/1wilkens/pam) [![Build Status](https://travis-ci.org/1wilkens/pam.svg)](https://travis-ci.org/1wilkens/pam)
 
 Safe Rust bindings to Linux Pluggable Authentication Modules (PAM).
-Currently only supports basic username/password authentication.
+Currently only supports basic username/password authentication out-of-the-box.
 
-[Documentation @ docs.rs](https://docs.rs/pam-auth/)
+[Documentation @ docs.rs](https://docs.rs/pam/)
 
 ## Warning
 Environment support through the `env` module is probably broken and should not be used in the current state!
@@ -20,18 +20,18 @@ considered development versions. This means the API could change any time.
 1. Add `pam-auth` to your Cargo.toml:
 ```toml
 [dependencies]
-pam-auth = "0.5.0"
+pam = "0.7.0"
 ```
 2. Use the `Authenticator` struct to authenticate and open a session
 ```rust
-extern crate pam_auth;
+extern crate pam;
 pub fn main() {
         let service = "<yourapp>";
         let user = "<user>";
         let password = "<pass>";
 
-        let mut auth = pam_auth::Authenticator::new(service).unwrap();
-        auth.set_credentials(user, password);
+        let mut auth = pam::Authenticator::with_password(service).unwrap();
+        auth.get_handler().set_credentials(user, password);
         if auth.authenticate().is_ok() && auth.open_session().is_ok() {
             println!("Successfully opened a session!");
         }
@@ -44,9 +44,9 @@ pub fn main() {
 ## TODO:
   - [x] Implement basic user/password authentication
   - [x] Add `Authenticator` struct
-  - [ ] Add documentation
-  - [ ] Verify current `conv` does not leak memory
-  - [ ] Allow custom `conv` functions to be passed (in pam-sys?)
+  - [ ] Add (more) documentation
+  - [x] Verify current `conv` does not leak memory
+  - [x] Allow custom `conv` functions to be passed
   - [ ] Code cleanup
 
 ## License

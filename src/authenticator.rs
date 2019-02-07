@@ -1,18 +1,21 @@
-use pam::{self, PamFlag, PamHandle, PamReturnCode};
+use pam_sys::{
+    acct_mgmt, authenticate, close_session, end, getenv, open_session, putenv, setcred, start,
+};
+use pam_sys::{PamFlag, PamHandle, PamReturnCode};
 use users;
 
 use std::{env, ptr};
 
-use crate::{env::get_pam_env, ffi, PamResult, Converse, PamError, PasswordConv};
+use crate::{env::get_pam_env, ffi, Converse, PamError, PamResult, PasswordConv};
 
 /// Main struct to authenticate a user
-/// 
+///
 /// You need to create an instance of it to start an authentication process. If you
 /// want a simple password-based authentication, you can use `Authenticator::with_password`,
 /// and to the following flow:
 ///
 /// ```no_run
-/// use pam_auth::Authenticator;
+/// use pam::Authenticator;
 ///
 /// let mut authenticator = Authenticator::with_password("system-auth")
 ///         .expect("Failed to init PAM client.");
@@ -55,7 +58,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         let conv = ffi::make_conversation(&mut *converse);
         let mut handle: *mut PamHandle = ptr::null_mut();
 
-        match pam::start(service, None, &conv, &mut handle) {
+        match start(service, None, &conv, &mut handle) {
             PamReturnCode::SUCCESS => unsafe {
                 Ok(Authenticator {
                     close_on_drop: true,
@@ -77,7 +80,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
 
     /// Perform the authentication with the provided credentials
     pub fn authenticate(&mut self) -> PamResult<()> {
-        self.last_code = pam::authenticate(self.handle, PamFlag::NONE);
+        self.last_code = authenticate(self.handle, PamFlag::NONE);
         if self.last_code != PamReturnCode::SUCCESS {
             // No need to reset here
             return Err(From::from(self.last_code));
@@ -85,7 +88,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
 
         self.is_authenticated = true;
 
-        self.last_code = pam::acct_mgmt(self.handle, PamFlag::NONE);
+        self.last_code = acct_mgmt(self.handle, PamFlag::NONE);
         if self.last_code != PamReturnCode::SUCCESS {
             // Probably not strictly neccessary but better be sure
             return self.reset();
@@ -101,18 +104,18 @@ impl<'a, C: Converse> Authenticator<'a, C> {
             return Err(PamReturnCode::PERM_DENIED.into());
         }
 
-        self.last_code = pam::setcred(self.handle, PamFlag::ESTABLISH_CRED);
+        self.last_code = setcred(self.handle, PamFlag::ESTABLISH_CRED);
         if self.last_code != PamReturnCode::SUCCESS {
             return self.reset();
         }
 
-        self.last_code = pam::open_session(self.handle, PamFlag::NONE);
+        self.last_code = open_session(self.handle, PamFlag::NONE);
         if self.last_code != PamReturnCode::SUCCESS {
             return self.reset();
         }
 
         // Follow openSSH and call pam_setcred before and after open_session
-        self.last_code = pam::setcred(self.handle, PamFlag::REINITIALIZE_CRED);
+        self.last_code = setcred(self.handle, PamFlag::REINITIALIZE_CRED);
         if self.last_code != PamReturnCode::SUCCESS {
             return self.reset();
         }
@@ -134,8 +137,9 @@ impl<'a, C: Converse> Authenticator<'a, C> {
             }
         }
 
-        let user = users::get_user_by_name(self.converse.username())
-            .unwrap_or_else(|| panic!("Could not get user by name: {:?}", self.converse.username()));
+        let user = users::get_user_by_name(self.converse.username()).unwrap_or_else(|| {
+            panic!("Could not get user by name: {:?}", self.converse.username())
+        });
 
         // Set some common environment variables
         self.set_env(
@@ -166,9 +170,9 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         env::set_var(key, value);
 
         // Set pam environment variable
-        if pam::getenv(self.handle, key).is_none() {
+        if getenv(self.handle, key).is_none() {
             let name_value = format!("{}={}", key, value);
-            match pam::putenv(self.handle, &name_value) {
+            match putenv(self.handle, &name_value) {
                 PamReturnCode::SUCCESS => Ok(()),
                 code => Err(From::from(code)),
             }
@@ -179,7 +183,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
 
     // Utility function to reset the pam handle in case of intermediate errors
     fn reset(&mut self) -> PamResult<()> {
-        pam::setcred(self.handle, PamFlag::DELETE_CRED);
+        setcred(self.handle, PamFlag::DELETE_CRED);
         self.is_authenticated = false;
         Err(From::from(self.last_code))
     }
@@ -188,9 +192,9 @@ impl<'a, C: Converse> Authenticator<'a, C> {
 impl<'a, C: Converse> Drop for Authenticator<'a, C> {
     fn drop(&mut self) {
         if self.has_open_session && self.close_on_drop {
-            pam::close_session(self.handle, PamFlag::NONE);
+            close_session(self.handle, PamFlag::NONE);
         }
-        let code = pam::setcred(self.handle, PamFlag::DELETE_CRED);
-        pam::end(self.handle, code);
+        let code = setcred(self.handle, PamFlag::DELETE_CRED);
+        end(self.handle, code);
     }
 }

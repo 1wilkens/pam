@@ -1,14 +1,15 @@
-extern crate pam_sys as pam;
+extern crate pam_sys;
 
 mod authenticator;
 mod env;
 mod ffi;
 
+use pam_sys::PamReturnCode;
 use std::ffi::{CStr, CString};
 
 pub use crate::authenticator::*;
 
-pub struct PamError(pam::PamReturnCode);
+pub struct PamError(PamReturnCode);
 pub type PamResult<T> = std::result::Result<T, PamError>;
 
 impl std::fmt::Debug for PamError {
@@ -29,8 +30,8 @@ impl std::error::Error for PamError {
     }
 }
 
-impl From<pam::PamReturnCode> for PamError {
-    fn from(err: pam::PamReturnCode) -> PamError {
+impl From<PamReturnCode> for PamError {
+    fn from(err: PamReturnCode) -> PamError {
         PamError(err)
     }
 }
@@ -73,7 +74,7 @@ pub trait Converse {
 /// PAM the value that have been set using the `set_credentials` method.
 pub struct PasswordConv {
     login: String,
-    passwd: String
+    passwd: String,
 }
 
 impl PasswordConv {
@@ -81,7 +82,7 @@ impl PasswordConv {
     fn new() -> PasswordConv {
         PasswordConv {
             login: String::new(),
-            passwd: String::new()
+            passwd: String::new(),
         }
     }
 

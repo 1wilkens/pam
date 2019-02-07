@@ -1,5 +1,5 @@
-use libc::{calloc, free, strdup, c_int, c_void, size_t};
-use pam::{PamMessage, PamMessageStyle, PamResponse, PamReturnCode, PamConversation};
+use libc::{c_int, c_void, calloc, free, size_t, strdup};
+use pam_sys::{PamConversation, PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
 
 use std::ffi::CStr;
 use std::mem;
@@ -9,15 +9,16 @@ use crate::Converse;
 pub fn make_conversation<C: Converse>(user_converse: &mut C) -> PamConversation {
     PamConversation {
         conv: Some(converse::<C>),
-        data_ptr: user_converse as *mut C as *mut c_void
+        data_ptr: user_converse as *mut C as *mut c_void,
     }
 }
 
-pub extern "C" fn converse<C: Converse>(num_msg: c_int,
-                           msg: *mut *mut PamMessage,
-                           out_resp: *mut *mut PamResponse,
-                           appdata_ptr: *mut c_void)
-                           -> c_int {
+pub extern "C" fn converse<C: Converse>(
+    num_msg: c_int,
+    msg: *mut *mut PamMessage,
+    out_resp: *mut *mut PamResponse,
+    appdata_ptr: *mut c_void,
+) -> c_int {
     // allocate space for responses
     let resp = unsafe {
         calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse

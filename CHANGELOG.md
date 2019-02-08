@@ -6,12 +6,30 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added - for new features.
 ### Changed - for changes in existing functionality.
 ### Deprecated - for once-stable features removed in upcoming releases.
-### Removed - for deprecated features removed in this release.
 ### Fixed - for any bug fixes.
+### Removed - for deprecated features removed in this release.
 ### Security - to invite users to upgrade in case of vulnerabilities.
 -->
 
 ## [Unreleased]
+
+## [0.7.0] - 2019-02-07
+### Added
+- Add `Converse` trait to handle conversation with pam
+- Add example: `spawn_bash` to demonstrate simple authentication
+- Add dev-dependency `rpassword`
+
+### Changed
+- RENAME from `pam-auth` to `pam`
+- Update to rust edition 2018
+- Change Authenticator to be generic over a `Converse` and add `with_password` function for username/password authentication
+- Update `users` dependency (0.5.3 -> ^0.8)
+
+### Fixed
+- Do not set response on errors in pam conversation function (PR #12)
+
+### Removed
+- Removed deprecated `simple` module
 
 ## [0.5.5] - 2018-07-04
 ### Changed
@@ -97,14 +115,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/1wilkens/pam-auth/compare/v0.5.5...HEAD
-[0.5.5]: https://github.com/1wilkens/pam-auth/compare/v0.5.4...v0.5.5
-[0.5.3]: https://github.com/1wilkens/pam-auth/compare/v0.5.3...v0.5.4
-[0.5.3]: https://github.com/1wilkens/pam-auth/compare/v0.5.2...v0.5.3
-[0.5.2]: https://github.com/1wilkens/pam-auth/compare/v0.5.1...v0.5.2
-[0.5.1]: https://github.com/1wilkens/pam-auth/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/1wilkens/pam-auth/compare/v0.4.1...v0.5.0
-[0.4.1]: https://github.com/1wilkens/pam-auth/compare/v0.4.0...v0.4.1
-[0.4.0]: https://github.com/1wilkens/pam-auth/compare/v0.3.1...v0.4.0
-[0.3.1]: https://github.com/1wilkens/pam-auth/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/1wilkens/pam-auth/compare/v0.2.0...v0.3.0
+[Unreleased]: https://github.com/1wilkens/pam/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/1wilkens/pam/compare/v0.5.5...v0.7.0
+[0.5.5]: https://github.com/1wilkens/pam/compare/v0.5.4...v0.5.5
+[0.5.3]: https://github.com/1wilkens/pam/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/1wilkens/pam/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/1wilkens/pam/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/1wilkens/pam/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/1wilkens/pam/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/1wilkens/pam/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/1wilkens/pam/compare/v0.3.1...v0.4.0
+[0.3.1]: https://github.com/1wilkens/pam/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/1wilkens/pam/compare/v0.2.0...v0.3.0

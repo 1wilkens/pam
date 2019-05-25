@@ -1,7 +1,9 @@
+use libc::{c_char, c_void};
 use pam_sys::{
-    acct_mgmt, authenticate, close_session, end, getenv, open_session, putenv, setcred, start,
+    acct_mgmt, authenticate, close_session, end, get_item, getenv, open_session, putenv, set_item,
+    setcred, start,
 };
-use pam_sys::{PamFlag, PamHandle, PamReturnCode};
+use pam_sys::{PamFlag, PamHandle, PamItemType, PamReturnCode};
 use users;
 
 use std::{env, ptr};
@@ -80,6 +82,36 @@ impl<'a, C: Converse> Authenticator<'a, C> {
 
     /// Perform the authentication with the provided credentials
     pub fn authenticate(&mut self) -> PamResult<()> {
+        // If PAM_USER item is set(like after an attempted - but failed - authentication) then
+        // PAM won't call the conversation prompt :(
+
+        let mut prompt_ptr = std::ptr::null();
+        self.last_code = get_item(self.handle, PamItemType::USER_PROMPT, &mut prompt_ptr);
+
+        if self.last_code != PamReturnCode::SUCCESS {
+            return Err(From::from(self.last_code));
+        }
+
+        let prompt_ptr = if prompt_ptr.is_null() {
+            None
+        } else {
+            Some(prompt_ptr)
+        };
+
+        if let Ok(login) = self.converse.prompt_echo(
+            prompt_ptr
+                .map(|p| unsafe { std::ffi::CStr::from_ptr(p as *const c_char) })
+                .unwrap_or_else(|| std::ffi::CStr::from_bytes_with_nul(b"login: \0").unwrap()),
+        ) {
+            self.last_code = set_item(self.handle, PamItemType::USER, unsafe {
+                &*(login.as_ptr() as *const c_void)
+            });
+        }
+
+        if self.last_code != PamReturnCode::SUCCESS {
+            return Err(From::from(self.last_code));
+        }
+
         self.last_code = authenticate(self.handle, PamFlag::NONE);
         if self.last_code != PamReturnCode::SUCCESS {
             // No need to reset here

@@ -73,9 +73,14 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         }
     }
 
-    /// Access the conversation handler of this Authenticator
-    pub fn get_handler(&mut self) -> &mut C {
+    /// Mutable access to the conversation handler of this Authenticator
+    pub fn mut_handler(&mut self) -> &mut C {
         &mut *self.converse
+    }
+
+    /// Immutable access to the conversation handler of this Authenticator
+    pub fn handler(&self) -> &C {
+        &*self.converse
     }
 
     /// Perform the authentication with the provided credentials

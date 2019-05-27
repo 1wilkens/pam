@@ -6,7 +6,7 @@ use users;
 
 use std::{env, ptr};
 
-use crate::{env::get_pam_env, ffi, Converse, PamError, PamResult, PasswordConv};
+use crate::{env::get_pam_env, env::PamEnvList, ffi, Converse, PamError, PamResult, PasswordConv};
 
 /// Main struct to authenticate a user
 ///
@@ -73,6 +73,10 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         }
     }
 
+    pub fn environment(&mut self) -> Option<PamEnvList> {
+        get_pam_env(self.handle)
+    }
+
     /// Access the conversation handler of this Authenticator
     pub fn get_handler(&mut self) -> &mut C {
         &mut *self.converse
@@ -130,10 +134,14 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         use users::os::unix::UserExt;
 
         // Set PAM environment in the local process
-        if let Some(mut env_list) = get_pam_env(self.handle) {
-            let env = env_list.to_vec();
-            for (key, value) in env {
-                env::set_var(&key, &value);
+        if let Some(env) = self.environment() {
+            for name_value in env.iter() {
+                let split = name_value.to_string_lossy();
+                let mut split = split.splitn(2, '=');
+
+                if let (Some(key), Some(value)) = (split.next(), split.next()) {
+                    env::set_var(&key, &value);
+                }
             }
         }
 

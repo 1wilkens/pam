@@ -20,7 +20,7 @@ use crate::{env::get_pam_env, ffi, Converse, PamError, PamResult, PasswordConv};
 /// let mut authenticator = Authenticator::with_password("system-auth")
 ///         .expect("Failed to init PAM client.");
 /// // Preset the login & password we will use for authentication
-/// authenticator.get_handler().set_credentials("login", "password");
+/// authenticator.mut_handler().set_credentials("login", "password");
 /// // actually try to authenticate:
 /// authenticator.authenticate().expect("Authentication failed!");
 /// // Now that we are authenticated, it's possible to open a sesssion:
@@ -30,7 +30,7 @@ use crate::{env::get_pam_env, ffi, Converse, PamError, PamResult, PasswordConv};
 /// If you wish to customise the PAM conversation function, you should rather create your
 /// authenticator with `Authenticator::with_handler`, providing a struct implementing the
 /// `Converse` trait. You can then mutably access your conversation handler using the
-/// `Authenticator::get_handler` method.
+/// `Authenticator::mut_handler` method.
 ///
 /// By default, the `Authenticator` will close any opened session when dropped. If you don't
 /// want this, you can change its `close_on_drop` field to `False`.

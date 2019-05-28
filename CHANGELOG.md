@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Fixed
+- Add untested(!) missing drop implementation for PamEnvList in non-linux builds
 
 ## [0.7.0] - 2019-02-07
 ### Added

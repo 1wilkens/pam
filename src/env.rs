@@ -8,7 +8,7 @@ pub struct PamEnvList {
     ptr: *const *const c_char,
 }
 
-pub struct IterPamEnv<'a> {
+pub struct PamEnvIter<'a> {
     envs: &'a PamEnvList,
     idx: isize,
     ended: bool,
@@ -24,8 +24,8 @@ pub(crate) fn get_pam_env(handle: &mut PamHandle) -> Option<PamEnvList> {
 }
 
 impl PamEnvList {
-    pub fn iter(&self) -> IterPamEnv {
-        IterPamEnv {
+    pub fn iter(&self) -> PamEnvIter {
+        PamEnvIter {
             envs: self,
             idx: 0,
             ended: false,
@@ -37,7 +37,7 @@ impl PamEnvList {
     }
 }
 
-impl<'a> Iterator for IterPamEnv<'a> {
+impl<'a> Iterator for PamEnvIter<'a> {
     type Item = &'a CStr;
 
     fn next(&mut self) -> Option<&'a CStr> {
@@ -59,7 +59,7 @@ impl<'a> Iterator for IterPamEnv<'a> {
     }
 }
 
-impl FusedIterator for IterPamEnv<'_> {}
+impl FusedIterator for PamEnvIter<'_> {}
 
 #[cfg(target_os = "linux")]
 impl Drop for PamEnvList {

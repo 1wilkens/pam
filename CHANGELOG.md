@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Add `Authenticator::environment` function.
 - Add `PamEnvIter` struct
 - Add `PamEnvList::iter` function to iterate over the `&CStr`'s in the environment list.
-- implement `FusedIterator` for `PamEnvIter`
+- Add implementation of `FusedIterator` for `PamEnvIter`
 
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds

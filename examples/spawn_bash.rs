@@ -25,7 +25,7 @@ fn main() {
     let mut authenticator =
         Authenticator::with_password("system-auth").expect("Failed to init PAM client!");
     authenticator
-        .get_handler()
+        .handler_mut()
         .set_credentials(login.clone(), password);
     authenticator
         .authenticate()

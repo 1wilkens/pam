@@ -1,4 +1,4 @@
-use libc::c_char;
+use libc::{c_char, free};
 use pam_sys::{getenvlist, raw, PamHandle};
 
 use core::iter::FusedIterator;
@@ -65,5 +65,17 @@ impl FusedIterator for PamEnvIter<'_> {}
 impl Drop for PamEnvList {
     fn drop(&mut self) {
         unsafe { raw::pam_misc_drop_env(self.ptr as *mut *mut c_char) };
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+impl Drop for PamEnvList {
+    fn drop(&mut self) {
+        let mut ptr = self.ptr;
+        while !ptr.is_null() {
+            unsafe { free(ptr) };
+            ptr = ptr.add(1);
+        }
+        unsafe { free(self.ptr) };
     }
 }

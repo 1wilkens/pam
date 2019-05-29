@@ -12,6 +12,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Fixed
+- Add untested(!) missing drop implementation for PamEnvList in non-linux builds
+
+### Changed
+- Change `Authenticator::get_handler` to `Authenticator::handler_mut` and add `Authenticator::handler` for immutable access to the handler
 
 ## [0.7.0] - 2019-02-07
 ### Added

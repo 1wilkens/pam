@@ -31,7 +31,7 @@ pub fn main() {
         let password = "<pass>";
 
         let mut auth = pam::Authenticator::with_password(service).unwrap();
-        auth.get_handler().set_credentials(user, password);
+        auth.handler_mut().set_credentials(user, password);
         if auth.authenticate().is_ok() && auth.open_session().is_ok() {
             println!("Successfully opened a session!");
         }

@@ -15,8 +15,8 @@ addons:
       - libpam0g-dev
 
 script:
-  - cargo build --release --verbose
-  - cargo test --verbose
+  - cargo build --release
+  - cargo test
 
 notifications:
   email:

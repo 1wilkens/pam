@@ -45,16 +45,14 @@ impl<'a> Iterator for PamEnvIter<'a> {
             return None;
         }
 
-        let env_ptr: *const *const c_char = unsafe { self.envs.ptr.offset(self.idx) };
+        let env_ptr = unsafe { self.envs.ptr.offset(self.idx) };
         self.idx += 1;
 
-        if !env_ptr.is_null() {
-            debug_assert!(unsafe { !(*env_ptr).is_null() });
-
-            Some(unsafe { CStr::from_ptr(*env_ptr) })
-        } else {
+        if env_ptr.is_null() || unsafe { (*env_ptr).is_null() } {
             self.ended = true;
             None
+        } else {
+            Some(unsafe { CStr::from_ptr(*env_ptr) })
         }
     }
 }

@@ -6,14 +6,14 @@ use std::mem;
 
 use crate::Converse;
 
-pub fn make_conversation<C: Converse>(user_converse: &mut C) -> PamConversation {
+pub fn make_conversation<'a, C: Converse<'a>>(user_converse: &mut C) -> PamConversation {
     PamConversation {
         conv: Some(converse::<C>),
         data_ptr: user_converse as *mut C as *mut c_void,
     }
 }
 
-pub extern "C" fn converse<C: Converse>(
+pub extern "C" fn converse<'a, C: Converse<'a>>(
     num_msg: c_int,
     msg: *mut *mut PamMessage,
     out_resp: *mut *mut PamResponse,

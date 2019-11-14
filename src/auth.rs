@@ -1,12 +1,8 @@
-use pam_sys::{
-    acct_mgmt, authenticate, close_session, end, getenv, open_session, putenv, setcred, start,
-};
-use pam_sys::{PamFlag, PamHandle, PamReturnCode};
 use users;
 
 use std::{env, ptr};
 
-use crate::{env::get_pam_env, ffi, Converse, PamError, PamResult, PasswordConv};
+use crate::{conv, wrapped::*, PamError, PamFlag, PamHandle, PamResult, PamReturnCode};
 
 /// Main struct to authenticate a user
 ///
@@ -29,33 +25,33 @@ use crate::{env::get_pam_env, ffi, Converse, PamError, PamResult, PasswordConv};
 ///
 /// If you wish to customise the PAM conversation function, you should rather create your
 /// authenticator with `Authenticator::with_handler`, providing a struct implementing the
-/// `Converse` trait. You can then mutably access your conversation handler using the
+/// `Conversation` trait. You can then mutably access your conversation handler using the
 /// `Authenticator::handler_mut` method.
 ///
 /// By default, the `Authenticator` will close any opened session when dropped. If you don't
 /// want this, you can change its `close_on_drop` field to `False`.
-pub struct Authenticator<'a, C: Converse> {
+pub struct Authenticator<'a, C: conv::Conversation> {
     /// Flag indicating whether the Authenticator should close the session on drop
     pub close_on_drop: bool,
     handle: &'a mut PamHandle,
-    converse: Box<C>,
+    conversation: Box<C>,
     is_authenticated: bool,
     has_open_session: bool,
     last_code: PamReturnCode,
 }
 
-impl<'a> Authenticator<'a, PasswordConv> {
+impl<'a> Authenticator<'a, conv::PasswordConv> {
     /// Create a new `Authenticator` with a given service name and a password-based conversation
-    pub fn with_password(service: &str) -> PamResult<Authenticator<'a, PasswordConv>> {
-        Authenticator::with_handler(service, PasswordConv::new())
+    pub fn with_password(service: &str) -> PamResult<Authenticator<'a, conv::PasswordConv>> {
+        Authenticator::with_handler(service, conv::PasswordConv::new())
     }
 }
 
-impl<'a, C: Converse> Authenticator<'a, C> {
+impl<'a, C: conv::Conversation> Authenticator<'a, C> {
     /// Creates a new Authenticator with a given service name and conversation callback
-    pub fn with_handler(service: &str, converse: C) -> PamResult<Authenticator<'a, C>> {
-        let mut converse = Box::new(converse);
-        let conv = ffi::make_conversation(&mut *converse);
+    pub fn with_handler(service: &str, conversation: C) -> PamResult<Authenticator<'a, C>> {
+        let mut conversation = Box::new(conversation);
+        let conv = conv::into_pam_conv(&mut *conversation);
         let mut handle: *mut PamHandle = ptr::null_mut();
 
         match start(service, None, &conv, &mut handle) {
@@ -63,7 +59,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
                 Ok(Authenticator {
                     close_on_drop: true,
                     handle: &mut *handle,
-                    converse,
+                    conversation,
                     is_authenticated: false,
                     has_open_session: false,
                     last_code: PamReturnCode::SUCCESS,
@@ -75,12 +71,12 @@ impl<'a, C: Converse> Authenticator<'a, C> {
 
     /// Mutable access to the conversation handler of this Authenticator
     pub fn handler_mut(&mut self) -> &mut C {
-        &mut *self.converse
+        &mut *self.conversation
     }
 
     /// Immutable access to the conversation handler of this Authenticator
     pub fn handler(&self) -> &C {
-        &*self.converse
+        &*self.conversation
     }
 
     /// Perform the authentication with the provided credentials
@@ -135,15 +131,18 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         use users::os::unix::UserExt;
 
         // Set PAM environment in the local process
-        if let Some(mut env_list) = get_pam_env(self.handle) {
+        /*if let Some(mut env_list) = get_pam_env(self.handle) {
             let env = env_list.to_vec();
             for (key, value) in env {
                 env::set_var(&key, &value);
             }
-        }
+        }*/
 
-        let user = users::get_user_by_name(self.converse.username()).unwrap_or_else(|| {
-            panic!("Could not get user by name: {:?}", self.converse.username())
+        let user = users::get_user_by_name(self.conversation.username()).unwrap_or_else(|| {
+            panic!(
+                "Could not get user by name: {:?}",
+                self.conversation.username()
+            )
         });
 
         // Set some common environment variables
@@ -194,7 +193,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
     }
 }
 
-impl<'a, C: Converse> Drop for Authenticator<'a, C> {
+impl<'a, C: conv::Conversation> Drop for Authenticator<'a, C> {
     fn drop(&mut self) {
         if self.has_open_session && self.close_on_drop {
             close_session(self.handle, PamFlag::NONE);

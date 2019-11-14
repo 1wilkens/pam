@@ -16,10 +16,16 @@ edition = "2018"
 [badges]
 azure-devops = { project = "1wilkens/ci", pipeline = "pam" }
 
+[features]
+default = ["auth"]
+
+auth = ["users"]
+module = []
+
 [dependencies]
 libc    = "^0.2"
-pam-sys = "^0.5"
-users   = "^0.8"
+pam-sys = "1.0.0-alpha1"
+users   = { version = "^0.8", optional = true }
 
 [dev-dependencies]
 rpassword = "2.0"

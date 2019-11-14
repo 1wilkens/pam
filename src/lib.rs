@@ -19,6 +19,11 @@ pub type PamMessage = pam_sys::pam_message;
 pub type PamResponse = pam_sys::pam_response;
 pub type PamResult<T> = std::result::Result<T, PamError>;
 
+pub use crate::{conv::Conversation, enums::*};
+
+#[cfg(feature = "auth")]
+pub use auth::Authenticator;
+
 impl std::fmt::Debug for PamError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         self.0.fmt(fmt)

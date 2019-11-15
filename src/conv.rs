@@ -87,7 +87,7 @@ pub(crate) fn into_pam_conv<C: Conversation>(conv: &mut C) -> pam_conv {
 }
 
 // FIXME: verify this
-pub unsafe extern "C" fn converse<C: Conversation>(
+pub(crate) unsafe extern "C" fn converse<C: Conversation>(
     num_msg: c_int,
     msg: *mut *const PamMessage,
     out_resp: *mut *mut PamResponse,
@@ -105,7 +105,8 @@ pub unsafe extern "C" fn converse<C: Conversation>(
     let mut result: PamReturnCode = PamReturnCode::SUCCESS;
     for i in 0..num_msg as isize {
         // get indexed values
-        let m: &mut PamMessage = &mut mem::transmute(**(msg.offset(i)));
+        // FIXME: check this
+        let m: &mut PamMessage = &mut *(*(msg.offset(i)) as *mut PamMessage);
         let r: &mut PamResponse = &mut *(resp.offset(i));
         let msg = CStr::from_ptr(m.msg);
         // match on msg_style

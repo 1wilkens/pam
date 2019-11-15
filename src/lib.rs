@@ -1,5 +1,7 @@
 // TODO: only for now
 #![allow(non_camel_case_types)]
+// We want to pass PamHandles by ref as they are opaque
+#![allow(clippy::trivially_copy_pass_by_ref)]
 
 mod conv;
 mod enums;

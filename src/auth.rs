@@ -1,8 +1,8 @@
 use users;
 
-use std::{env, ptr};
+use std::env;
 
-use crate::{conv, wrapped::*, PamError, PamFlag, PamHandle, PamResult, PamReturnCode};
+use crate::{conv, wrapped::*, PamFlag, PamHandle, PamResult, PamReturnCode};
 
 /// Main struct to authenticate a user
 ///
@@ -17,7 +17,7 @@ use crate::{conv, wrapped::*, PamError, PamFlag, PamHandle, PamResult, PamReturn
 ///         .expect("Failed to init PAM client.");
 /// // Preset the login & password we will use for authentication
 /// authenticator.handler_mut().set_credentials("login", "password");
-/// // actually try to authenticate:
+/// // Actually try to authenticate:
 /// authenticator.authenticate().expect("Authentication failed!");
 /// // Now that we are authenticated, it's possible to open a sesssion:
 /// authenticator.open_session().expect("Failed to open a session!");
@@ -52,21 +52,16 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
     pub fn with_handler(service: &str, conversation: C) -> PamResult<Authenticator<'a, C>> {
         let mut conversation = Box::new(conversation);
         let conv = conv::into_pam_conv(&mut *conversation);
-        let mut handle: *mut PamHandle = ptr::null_mut();
 
-        match start(service, None, &conv, &mut handle) {
-            PamReturnCode::SUCCESS => unsafe {
-                Ok(Authenticator {
-                    close_on_drop: true,
-                    handle: &mut *handle,
-                    conversation,
-                    is_authenticated: false,
-                    has_open_session: false,
-                    last_code: PamReturnCode::SUCCESS,
-                })
-            },
-            code => Err(PamError(code)),
-        }
+        let handle = start(service, None, &conv)?;
+        Ok(Authenticator {
+            close_on_drop: true,
+            handle,
+            conversation,
+            is_authenticated: false,
+            has_open_session: false,
+            last_code: PamReturnCode::SUCCESS,
+        })
     }
 
     /// Mutable access to the conversation handler of this Authenticator

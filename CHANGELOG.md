@@ -12,6 +12,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Changed
+- Move CI to azure pipelines (and remove `.travis.yml`)
+
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds
 

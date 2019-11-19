@@ -135,7 +135,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         use users::os::unix::UserExt;
 
         // Set PAM environment in the local process
-        if let Some(mut env_list) = get_pam_env(self.handle) {
+        if let Some(env_list) = get_pam_env(self.handle) {
             let env = env_list.to_vec();
             for (key, value) in env {
                 env::set_var(&key, &value);

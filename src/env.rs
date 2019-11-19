@@ -1,4 +1,4 @@
-use libc::{c_char, free};
+use libc::c_char;
 use pam_sys::{getenvlist, raw, PamHandle};
 
 use std::ffi::CStr;
@@ -17,7 +17,7 @@ pub fn get_pam_env(handle: &mut PamHandle) -> Option<PamEnvList> {
 }
 
 impl PamEnvList {
-    pub fn to_vec(&mut self) -> Vec<(String, String)> {
+    pub fn to_vec(&self) -> Vec<(String, String)> {
         let mut vec = Vec::new();
 
         let mut idx = 0;

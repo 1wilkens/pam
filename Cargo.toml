@@ -19,7 +19,7 @@ azure-devops = { project = "1wilkens/ci", pipeline = "pam" }
 [dependencies]
 libc    = "^0.2"
 pam-sys = "^0.5"
-users   = "^0.8"
+users   = "^0.9"
 
 [dev-dependencies]
 rpassword = "2.0"

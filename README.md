@@ -1,23 +1,19 @@
-# pam [![Version](https://img.shields.io/crates/v/pam.svg)](https://crates.io/crates/pam) [![License](https://img.shields.io/crates/l/pam.svg?branch=master)](https://travis-ci.org/1wilkens/pam) [![Build Status](https://travis-ci.org/1wilkens/pam.svg)](https://travis-ci.org/1wilkens/pam)
+# pam - Safe Rust API to the Linux Pluggable Authentication Modules (PAM)
 
-Safe Rust bindings to Linux Pluggable Authentication Modules (PAM).
-Currently only supports basic username/password authentication out-of-the-box.
+[![Crates.io](https://img.shields.io/crates/v/pam.svg)](https://crates.io/crates/pam)
+[![Documentation](https://docs.rs/pam/badge.svg)](https://docs.rs/pam/)
+[![Build Status](https://dev.azure.com/1wilkens/ci/_apis/build/status/pam?branchName=master)](https://dev.azure.com/1wilkens/ci/_build/latest?definitionId=2&branchName=master)
+[![License](https://img.shields.io/crates/l/pam.svg?branch=master)](https://travis-ci.org/1wilkens/pam)
 
-[Documentation @ docs.rs](https://docs.rs/pam/)
+Note: Currently only supports basic username/password authentication out-of-the-box.
+
 
 ## Warning
 Environment support through the `env` module is probably broken and should not be used in the current state!
 
-## Supported Rust versions
-The library is only continuously built against Rust stable, beta and nightly but as it does not use a lot of new language features it should probably compile on older versions as well.
-If you encounter problems building on older versions and a small fix can be applied to make the build succeed, consider opening a pull request.
-
-## Note about stability
-This crate follows [semantic versioning](http://semver.org). As such all versions below `1.0.0` should be
-considered development versions. This means the API could change any time.
 
 ## Usage
-1. Add `pam-auth` to your Cargo.toml:
+1. Add `pam` to your Cargo.toml:
 ```toml
 [dependencies]
 pam = "0.7.0"
@@ -41,6 +37,7 @@ pub fn main() {
 }
 ```
 
+
 ## TODO:
   - [x] Implement basic user/password authentication
   - [x] Add `Authenticator` struct
@@ -48,6 +45,17 @@ pub fn main() {
   - [x] Verify current `conv` does not leak memory
   - [x] Allow custom `conv` functions to be passed
   - [ ] Code cleanup
+
+
+## Supported Rust versions
+The library is only continuously built against Rust stable, beta and nightly but as it does not use a lot of new language features it should probably compile on older versions as well.
+If you encounter problems building on older versions and a small fix can be applied to make the build succeed, consider opening a pull request.
+
+
+## Note about stability
+This crate follows [semantic versioning](http://semver.org). As such all versions below `1.0.0` should be
+considered development versions. This means the API could change any time.
+
 
 ## License
 

@@ -13,10 +13,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Add `Authenticator::environment` function.
-- Add `PamEnvIter` struct
-- Add `PamEnvList::iter` function to iterate over the `&CStr`'s in the environment list.
-- Add implementation of `FusedIterator` for `PamEnvIter`
+- Add API for interacting with the PAM environment (needs some more tests)
+  - Add `Authenticator::environment` function.
+  - Add `PamEnvIter` struct
+  - Add `PamEnvList::iter` function to iterate over the `&CStr`'s in the environment list.
+  - Add implementation of `FusedIterator` for `PamEnvIter`
+### Changed
+- Move CI to azure pipelines (and remove `.travis.yml`)
 
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds

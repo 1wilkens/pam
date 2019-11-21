@@ -1,5 +1,3 @@
-extern crate pam_sys;
-
 mod authenticator;
 mod env;
 mod ffi;
@@ -7,6 +5,7 @@ mod ffi;
 use pam_sys::PamReturnCode;
 use std::ffi::{CStr, CString};
 
+pub use pam_sys;
 pub use crate::authenticator::*;
 
 pub struct PamError(PamReturnCode);

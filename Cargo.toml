@@ -3,7 +3,7 @@
 name = "pam"
 version = "0.7.0"
 authors = ["Florian Wilkens <gh@1wilkens.org>"]
-description = "Safe Rust wrappers for PAM authentification"
+description = "Safe Rust wrappers for PAM authentication"
 license = "MIT OR Apache-2.0"
 categories = ["authentication"]
 

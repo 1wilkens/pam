@@ -26,7 +26,8 @@ fn main() {
         Authenticator::with_password("system-auth").expect("Failed to init PAM client!");
     authenticator
         .handler_mut()
-        .set_credentials(login.clone(), password);
+        .set_credentials(login.clone(), password)
+        .unwrap();
     authenticator
         .authenticate()
         .expect("Authentication failed!");

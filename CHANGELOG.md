@@ -12,6 +12,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Added
+- Add API for interacting with the PAM environment (needs some more tests)
+  - Add `Authenticator::environment` function.
+  - Add `PamEnvIter` struct
+  - Add `PamEnvList::iter` function to iterate over the `&CStr`'s in the environment list.
+  - Add implementation of `FusedIterator` for `PamEnvIter`
 ### Changed
 - Move CI to azure pipelines (and remove `.travis.yml`)
 
@@ -20,6 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Change `Authenticator::get_handler` to `Authenticator::handler_mut` and add `Authenticator::handler` for immutable access to the handler
+- Change `PamEnvList` to public and re-export env module at library root
 
 ## [0.7.0] - 2019-02-07
 ### Added

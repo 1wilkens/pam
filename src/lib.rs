@@ -8,6 +8,7 @@ use pam_sys::PamReturnCode;
 use std::ffi::{CStr, CString};
 
 pub use crate::authenticator::*;
+pub use crate::env::*;
 
 pub struct PamError(PamReturnCode);
 pub type PamResult<T> = std::result::Result<T, PamError>;

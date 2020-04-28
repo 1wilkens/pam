@@ -1,4 +1,4 @@
-stages:
+jobs:
   - template: default.yml@templates
     parameters:
       cross: false

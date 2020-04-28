@@ -1,5 +1,5 @@
 stages:
-  - template: azure/stages.yml@templates
+  - template: default.yml@templates
     parameters:
       cross: false
       setup:
@@ -10,4 +10,5 @@ resources:
     - repository: templates
       type: github
       name: crate-ci/azure-pipelines
+      ref: refs/heads/v0.4
       endpoint: 1wilkens

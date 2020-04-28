@@ -9,7 +9,7 @@ use std::ffi::{CStr, CString};
 
 pub use crate::authenticator::*;
 
-pub struct PamError(PamReturnCode);
+pub struct PamError(pub PamReturnCode);
 pub type PamResult<T> = std::result::Result<T, PamError>;
 
 impl std::fmt::Debug for PamError {

@@ -13,6 +13,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
+- Make PamReturnCode field in PamError public to allow matching on it
+
+### Changed
 - Move CI to azure pipelines (and remove `.travis.yml`)
 
 ### Fixed

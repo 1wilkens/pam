@@ -12,10 +12,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Added
+- Add Cargo features for `auth` (default) and `module`
+
 ### Changed
 - Change `Authenticator::get_handler` to `Authenticator::handler_mut` and add `Authenticator::handler` for immutable access to the handler
 - Move CI to azure pipelines (and remove `.travis.yml`)
-- Make PamReturnCode field in PamError public to allow matching on it
+- Make `PamReturnCode` field in `PamError` public to allow matching on it
 
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds

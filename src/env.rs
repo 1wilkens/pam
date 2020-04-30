@@ -1,4 +1,4 @@
-use libc::{c_char, free};
+use libc::c_char;
 use pam_sys::{getenvlist, raw, PamHandle};
 
 use std::ffi::CStr;

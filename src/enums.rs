@@ -2,109 +2,111 @@
 //!
 //! This modules contains struct and enum definitions used by `pam-sys`.
 
+use pam_macros::pam_enum;
+
 /// The Linux-PAM return values
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[pam_enum]
 pub enum PamReturnCode {
+    /// System error
+    System_Err,
+
     /// Successful function return
-    SUCCESS = pam_sys::PAM_SUCCESS as isize,
+    Success,
 
     /// dlopen() failure when dynamically loading a service module
-    OPEN_ERR = pam_sys::PAM_OPEN_ERR as isize,
+    Open_Err,
 
     /// Symbol not found
-    SYMBOL_ERR = pam_sys::PAM_SYMBOL_ERR as isize,
+    Symbol_Err,
 
     /// Error in service module
-    SERVICE_ERR = pam_sys::PAM_SERVICE_ERR as isize,
-
-    /// System error
-    SYSTEM_ERR = pam_sys::PAM_SYSTEM_ERR as isize,
+    Service_Err,
 
     /// Memory buffer error
-    BUF_ERR = pam_sys::PAM_BUF_ERR as isize,
+    Buf_Err,
 
     /// Permission denied
-    PERM_DENIED = pam_sys::PAM_PERM_DENIED as isize,
+    Perm_Denied,
 
     /// Authentication failure
-    AUTH_ERR = pam_sys::PAM_AUTH_ERR as isize,
+    Auth_Err,
 
     /// Can not access authentication data due to insufficient credentials
-    CRED_INSUFFICIENT = pam_sys::PAM_CRED_INSUFFICIENT as isize,
+    Cred_Insufficient,
 
     /// Underlying authentication service can not retrieve authentication information
-    AUTHINFO_UNAVAIL = pam_sys::PAM_AUTHINFO_UNAVAIL as isize,
+    Authinfo_Unavail,
 
     /// User not known to the underlying authentication module
-    USER_UNKNOWN = pam_sys::PAM_USER_UNKNOWN as isize,
+    User_Unknown,
 
     /// An authentication service has maintained a retry count which has been reached.
     /// No further retries should be attempted
-    MAXTRIES = pam_sys::PAM_MAXTRIES as isize,
+    MaxTries,
 
     /// New authentication token required.
     /// This is normally returned if the machine security policies require
     /// that the password should be changed beccause the password is NULL or it has aged
-    NEW_AUTHTOK_REQD = pam_sys::PAM_NEW_AUTHTOK_REQD as isize,
+    New_Authtok_Reqd,
 
     /// User account has expired
-    ACCT_EXPIRED = pam_sys::PAM_ACCT_EXPIRED as isize,
+    Acct_Expired,
 
     /// Can not make/remove an entry for the specified session
-    SESSION_ERR = pam_sys::PAM_SESSION_ERR as isize,
+    Session_Err,
 
     /// Underlying authentication service can not retrieve user credentials unavailable
-    CRED_UNAVAIL = pam_sys::PAM_CRED_UNAVAIL as isize,
+    Cred_Unavail,
 
     /// User credentials expired
-    CRED_EXPIRED = pam_sys::PAM_CRED_EXPIRED as isize,
+    Cred_Expired,
 
     /// Failure setting user credentials
-    CRED_ERR = pam_sys::PAM_CRED_ERR as isize,
+    Cred_Err,
 
     /// No module specific data is present
-    NO_MODULE_DATA = pam_sys::PAM_NO_MODULE_DATA as isize,
+    No_Module_Data,
 
     /// Conversation error
-    CONV_ERR = pam_sys::PAM_CONV_ERR as isize,
+    Conv_Err,
 
     /// Authentication token manipulation error
-    AUTHTOK_ERR = pam_sys::PAM_AUTHTOK_ERR as isize,
+    AuthTok_Err,
 
     /// Authentication information cannot be recovered
-    AUTHTOK_RECOVERY_ERR = pam_sys::PAM_AUTHTOK_RECOVERY_ERR as isize,
+    AuthTok_Recovery_Err,
 
     /// Authentication token lock busy
-    AUTHTOK_LOCK_BUSY = pam_sys::PAM_AUTHTOK_LOCK_BUSY as isize,
+    AuthTok_Lock_Busy,
 
     /// Authentication token aging disabled
-    AUTHTOK_DISABLE_AGING = pam_sys::PAM_AUTHTOK_DISABLE_AGING as isize,
+    AuthTok_Disable_Aging,
 
     /// Preliminary check by password service
-    TRY_AGAIN = pam_sys::PAM_TRY_AGAIN as isize,
+    Try_Again,
 
     /// Ignore underlying account module regardless of whether
     /// the control flag is required as isize, optional as isize, or sufficient
-    IGNORE = pam_sys::PAM_IGNORE as isize,
+    Ignore,
 
     /// Critical error (?module fail now request)
-    AUTHTOK_EXPIRED = pam_sys::PAM_AUTHTOK_EXPIRED as isize,
+    AuthTok_Expired,
 
     /// user's authentication token has expired
-    ABORT = pam_sys::PAM_ABORT as isize,
+    Abort,
 
     /// module is not known
-    MODULE_UNKNOWN = pam_sys::PAM_MODULE_UNKNOWN as isize,
+    Module_Unknown,
 
     /// Bad item passed to pam_*_item()
-    BAD_ITEM = pam_sys::PAM_BAD_ITEM as isize,
+    Bad_Item,
 
     /// conversation function is event driven and data is not available yet
-    CONV_AGAIN = pam_sys::PAM_CONV_AGAIN as isize,
+    Conv_Again,
 
     /// please call this function again to complete authentication stack.
     /// Before calling again as isize, verify that conversation is completed
-    INCOMPLETE = pam_sys::PAM_INCOMPLETE as isize,
+    Incomplete,
 }
 
 impl std::fmt::Display for PamReturnCode {
@@ -113,80 +115,39 @@ impl std::fmt::Display for PamReturnCode {
     }
 }
 
-impl From<i32> for PamReturnCode {
-    fn from(status: i32) -> PamReturnCode {
-        match status {
-            0 => PamReturnCode::SUCCESS,
-            1 => PamReturnCode::OPEN_ERR,
-            2 => PamReturnCode::SYMBOL_ERR,
-            3 => PamReturnCode::SERVICE_ERR,
-            4 => PamReturnCode::SYSTEM_ERR,
-            5 => PamReturnCode::BUF_ERR,
-            6 => PamReturnCode::PERM_DENIED,
-            7 => PamReturnCode::AUTH_ERR,
-            8 => PamReturnCode::CRED_INSUFFICIENT,
-            9 => PamReturnCode::AUTHINFO_UNAVAIL,
-            10 => PamReturnCode::USER_UNKNOWN,
-            11 => PamReturnCode::MAXTRIES,
-            12 => PamReturnCode::NEW_AUTHTOK_REQD,
-            13 => PamReturnCode::ACCT_EXPIRED,
-            14 => PamReturnCode::SESSION_ERR,
-            15 => PamReturnCode::CRED_UNAVAIL,
-            16 => PamReturnCode::CRED_EXPIRED,
-            17 => PamReturnCode::CRED_ERR,
-            18 => PamReturnCode::NO_MODULE_DATA,
-            19 => PamReturnCode::CONV_ERR,
-            20 => PamReturnCode::AUTHTOK_ERR,
-            21 => PamReturnCode::AUTHTOK_RECOVERY_ERR,
-            22 => PamReturnCode::AUTHTOK_LOCK_BUSY,
-            23 => PamReturnCode::AUTHTOK_DISABLE_AGING,
-            24 => PamReturnCode::TRY_AGAIN,
-            25 => PamReturnCode::IGNORE,
-            26 => PamReturnCode::ABORT,
-            27 => PamReturnCode::AUTHTOK_EXPIRED,
-            28 => PamReturnCode::MODULE_UNKNOWN,
-            29 => PamReturnCode::BAD_ITEM,
-            30 => PamReturnCode::CONV_AGAIN,
-            31 => PamReturnCode::INCOMPLETE,
-            _ => PamReturnCode::SYSTEM_ERR,
-        }
-    }
-}
-
 /// The Linux-PAM flags
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[pam_enum]
 pub enum PamFlag {
+    None = 0,
+
     /// Authentication service should not generate any messages
-    SILENT = pam_sys::PAM_SILENT as isize,
+    Silent,
 
     /// The authentication service should return AUTH_ERROR
     /// if the user has a null authentication token
     /// (used by pam_authenticate{,_secondary}())
-    DISALLOW_NULL_AUTHTOK = pam_sys::PAM_DISALLOW_NULL_AUTHTOK as isize,
+    Disallow_Null_AuthTok,
 
     /// Set user credentials for an authentication service
     /// (used for pam_setcred())
-    ESTABLISH_CRED = pam_sys::PAM_ESTABLISH_CRED as isize,
+    Establish_Cred,
 
     /// Delete user credentials associated with an authentication service
     /// (used for pam_setcred())
-    DELETE_CRED = pam_sys::PAM_DELETE_CRED as isize,
+    Delete_Cred,
 
     /// Reinitialize user credentials
     /// (used for pam_setcred())
-    REINITIALIZE_CRED = pam_sys::PAM_REINITIALIZE_CRED as isize,
+    Reinitialize_Cred,
 
     /// Extend lifetime of user credentials
     /// (used for pam_setcred())
-    REFRESH_CRED = pam_sys::PAM_REFRESH_CRED as isize,
+    Refresh_Cred,
 
     /// The password service should only update those passwords that have aged.
     /// If this flag is not passed, the password service should update all passwords.
     /// (used by pam_chauthtok)
-    CHANGE_EXPIRED_AUTHTOK = pam_sys::PAM_CHANGE_EXPIRED_AUTHTOK as isize,
-
-    // TODO: check if there is some native constant for this
-    NONE = 0,
+    Change_Expired_AuthTok,
 }
 
 impl std::fmt::Display for PamFlag {
@@ -200,46 +161,46 @@ impl std::fmt::Display for PamFlag {
 /// These defines are used by `pam_set_item()` `and pam_get_item()`.
 /// Please check the spec which are allowed for use by applications
 /// and which are only allowed for use by modules.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[pam_enum]
 pub enum PamItemType {
     /// The service name
-    SERVICE = 1,
+    Service,
 
     /// The user name
-    USER = 2,
+    User,
 
     /// The tty name
-    TTY = 3,
+    TTY,
 
     /// The remote host name
-    RHOST = 4,
+    RHost,
 
     /// The pam_conv structure
-    CONV = 5,
+    Conv,
 
     /// The authentication token (password)
-    AUTHTOK = 6,
+    AuthTok,
 
     /// The old authentication token
-    OLDAUTHTOK = 7,
+    OldAuthTok,
 
     /// The remote user name
-    RUSER = 8,
+    RUser,
 
     /// the prompt for getting a username Linux-PAM extensions
-    USER_PROMPT = 9,
+    User_Prompt,
 
     /// app supplied function to override failure delays
-    FAIL_DELAY = 10,
+    Fail_Delay,
 
     /// X display name
-    XDISPLAY = 11,
+    XDisplay,
 
     /// X server authentication data
-    XAUTHDATA = 12,
+    XAuthData,
 
     /// The type for pam_get_authtok
-    AUTHTOK_TYPE = 13,
+    AuthTok_Type,
 }
 
 impl std::fmt::Display for PamItemType {
@@ -249,28 +210,16 @@ impl std::fmt::Display for PamItemType {
 }
 
 /// The Linux-PAM message styles
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[pam_enum]
 pub enum PamMessageStyle {
-    PROMPT_ECHO_OFF = 1,
-    PROMPT_ECHO_ON = 2,
-    ERROR_MSG = 3,
-    TEXT_INFO = 4,
+    Prompt_Echo_On,
+    Prompt_Echo_Off,
+    Error_Msg,
+    Text_Info,
 }
 
 impl std::fmt::Display for PamMessageStyle {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         f.write_str(&format!("{:?} ({})", self, *self as i32))
-    }
-}
-
-impl From<i32> for PamMessageStyle {
-    fn from(style: i32) -> PamMessageStyle {
-        match style {
-            1 => PamMessageStyle::PROMPT_ECHO_OFF,
-            2 => PamMessageStyle::PROMPT_ECHO_ON,
-            3 => PamMessageStyle::ERROR_MSG,
-            4 => PamMessageStyle::TEXT_INFO,
-            _ => PamMessageStyle::ERROR_MSG,
-        }
     }
 }

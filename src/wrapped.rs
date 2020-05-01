@@ -31,11 +31,11 @@ pub fn start<'a>(
         match unsafe { ffi::pam_start(service.as_ptr(), user_ptr, conversation, &mut handle) }
             .into()
         {
-            // Reborrow is safe, because we
-            PamReturnCode::SUCCESS => {
+            // Reborrow is safe, because we check for null before
+            PamReturnCode::Success => {
                 assert!(
                     !handle.is_null(),
-                    "Got PAM_SUCCESS from pam_start but handle is null!"
+                    "Got PAM_Success from pam_start but handle is null!"
                 );
                 Ok(unsafe { &mut *handle })
             }
@@ -43,7 +43,7 @@ pub fn start<'a>(
         }
     } else {
         // Invalid service
-        Err(PamReturnCode::BUF_ERR.into())
+        Err(PamReturnCode::Buf_Err.into())
     }
 }
 
@@ -93,7 +93,7 @@ pub fn set_item(handle: &mut PamHandle, item_type: PamItemType, item: &c_void) -
 pub fn get_item<'a>(handle: &PamHandle, item_type: PamItemType) -> PamResult<&'a c_void> {
     let mut item_ptr: *const c_void = std::ptr::null();
     match unsafe { ffi::pam_get_item(handle, item_type as c_int, &mut item_ptr) }.into() {
-        PamReturnCode::SUCCESS => Ok(unsafe { &*item_ptr }),
+        PamReturnCode::Success => Ok(unsafe { &*item_ptr }),
         err => Err(err.into()),
     }
 }
@@ -110,7 +110,7 @@ pub fn putenv(handle: &mut PamHandle, name_value: &str) -> PamReturnCode {
     if let Ok(name_value) = CString::new(name_value) {
         unsafe { ffi::pam_putenv(handle, name_value.as_ptr()) }.into()
     } else {
-        PamReturnCode::BUF_ERR
+        PamReturnCode::Buf_Err
     }
 }
 
@@ -179,7 +179,7 @@ pub fn misc_setenv(
         }
         .into()
     } else {
-        PamReturnCode::BUF_ERR
+        PamReturnCode::Buf_Err
     }
 }
 /* ----------------------- <security/pam_misc.h> --------------------------- */
@@ -196,7 +196,7 @@ pub fn set_data(
     if let Ok(module_data_name) = CString::new(module_data_name) {
         unsafe { ffi::pam_set_data(handle, module_data_name.as_ptr(), data, cleanup) }.into()
     } else {
-        PamReturnCode::BUF_ERR
+        PamReturnCode::Buf_Err
     }
 }
 
@@ -215,10 +215,10 @@ pub fn get_user<'a>(handle: &'a PamHandle, prompt: Option<&str>) -> PamResult<&'
     }
     .into()
     {
-        PamReturnCode::SUCCESS => {
+        PamReturnCode::Success => {
             assert!(
                 !user_ptr.is_null(),
-                "Got PAM_SUCCESS from pam_get_user but ptr is null!"
+                "Got PAM_Success from pam_get_user but ptr is null!"
             );
             Ok(unsafe { CStr::from_ptr(user_ptr) }
                 .to_str()
@@ -237,6 +237,6 @@ fn try_str_option_to_ptr(opt: Option<&str>) -> PamResult<*const c_char> {
         // No string given -> Return null-ptr
         None => Ok(std::ptr::null_mut()),
         // Invalid string given -> Return BUF_ERR
-        _ => Err(PamReturnCode::BUF_ERR.into()),
+        _ => Err(PamReturnCode::Buf_Err.into()),
     }
 }

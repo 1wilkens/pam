@@ -97,12 +97,12 @@ pub(crate) unsafe extern "C" fn converse<C: Conversation>(
     let resp =
         calloc(num_msg as usize, mem::size_of::<PamResponse>() as size_t) as *mut PamResponse;
     if resp.is_null() {
-        return PamReturnCode::BUF_ERR as c_int;
+        return PamReturnCode::Buf_Err as c_int;
     }
 
     let handler = &mut *(appdata_ptr as *mut C);
 
-    let mut result: PamReturnCode = PamReturnCode::SUCCESS;
+    let mut result: PamReturnCode = PamReturnCode::Success;
     for i in 0..num_msg as isize {
         // get indexed values
         // FIXME: check this
@@ -111,35 +111,35 @@ pub(crate) unsafe extern "C" fn converse<C: Conversation>(
         let msg = CStr::from_ptr(m.msg);
         // match on msg_style
         match PamMessageStyle::from(m.msg_style) {
-            PamMessageStyle::PROMPT_ECHO_ON => {
+            PamMessageStyle::Prompt_Echo_On => {
                 if let Ok(handler_response) = handler.prompt_echo(msg) {
                     r.resp = strdup(handler_response.as_ptr());
                 } else {
-                    result = PamReturnCode::CONV_ERR;
+                    result = PamReturnCode::Conv_Err;
                 }
             }
-            PamMessageStyle::PROMPT_ECHO_OFF => {
+            PamMessageStyle::Prompt_Echo_Off => {
                 if let Ok(handler_response) = handler.prompt_blind(msg) {
                     r.resp = strdup(handler_response.as_ptr());
                 } else {
-                    result = PamReturnCode::CONV_ERR;
+                    result = PamReturnCode::Conv_Err;
                 }
             }
-            PamMessageStyle::ERROR_MSG => {
+            PamMessageStyle::Error_Msg => {
                 handler.error(msg);
-                result = PamReturnCode::CONV_ERR;
+                result = PamReturnCode::Conv_Err;
             }
-            PamMessageStyle::TEXT_INFO => {
+            PamMessageStyle::Text_Info => {
                 handler.info(msg);
             }
         }
-        if result != PamReturnCode::SUCCESS {
+        if result != PamReturnCode::Success {
             break;
         }
     }
 
     // free allocated memory if an error occured
-    if result != PamReturnCode::SUCCESS {
+    if result != PamReturnCode::Success {
         free(resp as *mut c_void);
     } else {
         *out_resp = resp;

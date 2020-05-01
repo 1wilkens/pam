@@ -20,6 +20,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Change `Authenticator::get_handler` to `Authenticator::handler_mut` and add `Authenticator::handler` for immutable access to the handler
 - Move CI to azure pipelines (and remove `.travis.yml`)
 - Make `PamReturnCode` field in `PamError` public to allow matching on it
+- Generate enums via proc macro `#[pam_enum]` (experimental)
+    - Make variants capitalized snake_case
+    - Automatically implement `std::convert::From<i32>` to cast return values
 
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds

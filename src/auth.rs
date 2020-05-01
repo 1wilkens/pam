@@ -60,7 +60,7 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
             conversation,
             is_authenticated: false,
             has_open_session: false,
-            last_code: PamReturnCode::SUCCESS,
+            last_code: PamReturnCode::Success,
         })
     }
 
@@ -76,16 +76,16 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
 
     /// Perform the authentication with the provided credentials
     pub fn authenticate(&mut self) -> PamResult<()> {
-        self.last_code = authenticate(self.handle, PamFlag::NONE);
-        if self.last_code != PamReturnCode::SUCCESS {
+        self.last_code = authenticate(self.handle, PamFlag::None);
+        if self.last_code != PamReturnCode::Success {
             // No need to reset here
             return Err(From::from(self.last_code));
         }
 
         self.is_authenticated = true;
 
-        self.last_code = acct_mgmt(self.handle, PamFlag::NONE);
-        if self.last_code != PamReturnCode::SUCCESS {
+        self.last_code = acct_mgmt(self.handle, PamFlag::None);
+        if self.last_code != PamReturnCode::Success {
             // Probably not strictly neccessary but better be sure
             return self.reset();
         }
@@ -97,22 +97,22 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
     pub fn open_session(&mut self) -> PamResult<()> {
         if !self.is_authenticated {
             //TODO: is this the right return code?
-            return Err(PamReturnCode::PERM_DENIED.into());
+            return Err(PamReturnCode::Perm_Denied.into());
         }
 
-        self.last_code = setcred(self.handle, PamFlag::ESTABLISH_CRED);
-        if self.last_code != PamReturnCode::SUCCESS {
+        self.last_code = setcred(self.handle, PamFlag::Establish_Cred);
+        if self.last_code != PamReturnCode::Success {
             return self.reset();
         }
 
-        self.last_code = open_session(self.handle, PamFlag::NONE);
-        if self.last_code != PamReturnCode::SUCCESS {
+        self.last_code = open_session(self.handle, PamFlag::None);
+        if self.last_code != PamReturnCode::Success {
             return self.reset();
         }
 
         // Follow openSSH and call pam_setcred before and after open_session
-        self.last_code = setcred(self.handle, PamFlag::REINITIALIZE_CRED);
-        if self.last_code != PamReturnCode::SUCCESS {
+        self.last_code = setcred(self.handle, PamFlag::Reinitialize_Cred);
+        if self.last_code != PamReturnCode::Success {
             return self.reset();
         }
 
@@ -172,7 +172,7 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
         if getenv(self.handle, key).is_none() {
             let name_value = format!("{}={}", key, value);
             match putenv(self.handle, &name_value) {
-                PamReturnCode::SUCCESS => Ok(()),
+                PamReturnCode::Success => Ok(()),
                 code => Err(From::from(code)),
             }
         } else {
@@ -182,7 +182,7 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
 
     // Utility function to reset the pam handle in case of intermediate errors
     fn reset(&mut self) -> PamResult<()> {
-        setcred(self.handle, PamFlag::DELETE_CRED);
+        setcred(self.handle, PamFlag::Delete_Cred);
         self.is_authenticated = false;
         Err(From::from(self.last_code))
     }
@@ -191,9 +191,9 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
 impl<'a, C: conv::Conversation> Drop for Authenticator<'a, C> {
     fn drop(&mut self) {
         if self.has_open_session && self.close_on_drop {
-            close_session(self.handle, PamFlag::NONE);
+            close_session(self.handle, PamFlag::None);
         }
-        let code = setcred(self.handle, PamFlag::DELETE_CRED);
+        let code = setcred(self.handle, PamFlag::Delete_Cred);
         end(self.handle, code);
     }
 }

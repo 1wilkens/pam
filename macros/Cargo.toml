@@ -1,0 +1,20 @@
+[package]
+
+name = "pam-macros"
+version = "0.0.1"
+authors = ["Florian Wilkens <gh@1wilkens.org>"]
+description = "Macros for the pam crate"
+license = "MIT OR Apache-2.0"
+
+repository = "https://github.com/1wilkens/pam/"
+documentation = "https://docs.rs/pam_macros/"
+
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0"
+syn = { version = "1.0", features = ["full"] }
+quote = { version = "1.0" }

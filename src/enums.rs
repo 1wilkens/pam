@@ -149,6 +149,18 @@ pub enum PamFlag {
     /// If this flag is not passed, the password service should update all passwords.
     /// (used by pam_chauthtok)
     Change_Expired_AuthTok,
+
+    /// The password service should update passwords Note: PAM_PRELIM_CHECK
+    /// and PAM_UPDATE_AUTHTOK cannot both be set simultaneously!
+    Update_AuthTok,
+
+    /// The following two flags are for use across the Linux-PAM/module
+    /// interface only. The Application is not permitted to use these
+    /// tokens.
+    ///
+    /// The password service should only perform preliminary checks.  No
+    /// passwords should be updated.
+    Prelim_Check,
 }
 
 impl std::fmt::Display for PamFlag {

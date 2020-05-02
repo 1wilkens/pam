@@ -210,7 +210,6 @@ mod misc {
     }
 
     /*#[inline]
-    #[cfg(target_os = "linux")]
     pub fn misc_drop_env(env: &mut *mut c_char) -> PamReturnCode {
         unsafe { ffi::pam_misc_drop_env(env) })
     }*/
@@ -240,6 +239,11 @@ mod misc {
 /* ----------------------- <security/pam_modules.h> ------------------------ */
 #[cfg(feature = "module")]
 mod modules {
+    use crate::{PamHandle, PamResult, PamReturnCode};
+    use libc::{c_char, c_int, c_void};
+    use pam_sys as ffi;
+    use std::ffi::{CStr, CString};
+
     #[inline]
     pub fn set_data(
         handle: &mut PamHandle,
@@ -267,7 +271,7 @@ mod modules {
         // For some reason, bindgen marks the handl as mutable in pam_sys although man says const
         let handle = handle as *const PamHandle as *mut PamHandle;
         let mut user_ptr: *const c_char = std::ptr::null();
-        let prompt_ptr = try_str_option_to_ptr(prompt)?;
+        let prompt_ptr = super::try_str_option_to_ptr(prompt)?;
 
         match unsafe { ffi::pam_get_user(handle, &mut user_ptr, prompt_ptr) }.into() {
             PamReturnCode::Success => {

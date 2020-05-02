@@ -118,6 +118,7 @@ impl std::fmt::Display for PamReturnCode {
 /// The Linux-PAM flags
 #[pam_enum]
 pub enum PamFlag {
+    /// Default value, if no specific flags should be passed
     None = 0,
 
     /// Authentication service should not generate any messages

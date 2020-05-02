@@ -1,5 +1,3 @@
-use users;
-
 use std::env;
 
 use crate::{conv, wrapped::*, PamFlag, PamHandle, PamResult, PamReturnCode};
@@ -64,14 +62,14 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
         })
     }
 
-    /// Mutable access to the conversation handler of this Authenticator
-    pub fn handler_mut(&mut self) -> &mut C {
-        &mut *self.conversation
-    }
-
     /// Immutable access to the conversation handler of this Authenticator
     pub fn handler(&self) -> &C {
         &*self.conversation
+    }
+
+    /// Mutable access to the conversation handler of this Authenticator
+    pub fn handler_mut(&mut self) -> &mut C {
+        &mut *self.conversation
     }
 
     /// Perform the authentication with the provided credentials
@@ -125,14 +123,6 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
     fn initialize_environment(&mut self) -> PamResult<()> {
         use users::os::unix::UserExt;
 
-        // Set PAM environment in the local process
-        /*if let Some(mut env_list) = get_pam_env(self.handle) {
-            let env = env_list.to_vec();
-            for (key, value) in env {
-                env::set_var(&key, &value);
-            }
-        }*/
-
         let user = users::get_user_by_name(self.conversation.username()).unwrap_or_else(|| {
             panic!(
                 "Could not get user by name: {:?}",
@@ -156,9 +146,7 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
         self.set_env("HOME", user.home_dir().to_str().unwrap())?;
         self.set_env("PWD", user.home_dir().to_str().unwrap())?;
         self.set_env("SHELL", user.shell().to_str().unwrap())?;
-        // Taken from https://github.com/gsingh93/display-manager/blob/master/pam.c
-        // Should be a better way to get this. Revisit later.
-        self.set_env("PATH", "$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin")?;
+        // Note: We don't set PATH here, as this should be the job of `pam_env.so`
 
         Ok(())
     }
@@ -169,12 +157,9 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
         env::set_var(key, value);
 
         // Set pam environment variable
-        if getenv(self.handle, key).is_none() {
+        if getenv(self.handle, key).is_ok() {
             let name_value = format!("{}={}", key, value);
-            match putenv(self.handle, &name_value) {
-                PamReturnCode::Success => Ok(()),
-                code => Err(From::from(code)),
-            }
+            putenv(self.handle, &name_value)
         } else {
             Ok(())
         }

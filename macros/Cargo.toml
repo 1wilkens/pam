@@ -1,7 +1,7 @@
 [package]
 
 name = "pam-macros"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Florian Wilkens <gh@1wilkens.org>"]
 description = "Macros for the pam crate"
 license = "MIT OR Apache-2.0"

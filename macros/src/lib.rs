@@ -48,6 +48,7 @@ pub fn pam_enum(_: TokenStream, input: TokenStream) -> TokenStream {
 
 fn derive_attrs() -> Vec<syn::Attribute> {
     vec![
+        parse_quote! { #[repr(C)] },
         parse_quote! { #[derive(Debug)] },
         parse_quote! { #[derive(Copy)] },
         parse_quote! { #[derive(Clone)] },

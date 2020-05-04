@@ -2,10 +2,17 @@
 // We want to pass PamHandles by ref as they are opaque
 #![allow(clippy::trivially_copy_pass_by_ref)]
 
+//! Rustified API to the Linux-PAM authentication libary
+
+// Reexport pam_sys so downstream users don't need to depend on it
+pub use pam_sys;
+
 mod conv;
 mod enums;
+mod functions;
+mod types;
 
-pub mod wrapped;
+pub use crate::{enums::*, functions::*, types::*};
 
 #[cfg(feature = "auth")]
 pub mod auth;
@@ -14,36 +21,5 @@ pub mod module;
 
 pub use crate::{conv::Conversation, enums::*};
 
-pub struct PamError(pub PamReturnCode);
-
-pub type PamHandle = pam_sys::pam_handle_t;
-pub type PamMessage = pam_sys::pam_message;
-pub type PamResponse = pam_sys::pam_response;
-pub type PamResult<T> = std::result::Result<T, PamError>;
-
 #[cfg(feature = "auth")]
 pub use auth::Authenticator;
-
-impl std::fmt::Debug for PamError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        self.0.fmt(fmt)
-    }
-}
-
-impl std::fmt::Display for PamError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        self.0.fmt(fmt)
-    }
-}
-
-impl std::error::Error for PamError {
-    fn description(&self) -> &str {
-        "PAM returned an error code"
-    }
-}
-
-impl From<PamReturnCode> for PamError {
-    fn from(err: PamReturnCode) -> PamError {
-        PamError(err)
-    }
-}

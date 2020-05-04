@@ -25,8 +25,8 @@ module = []
 [dependencies]
 pam-macros = "=0.0.1"
 libc    = "^0.2"
-pam-sys = "1.0.0-alpha1"
-users   = { version = "^0.8", optional = true }
+pam-sys = "1.0.0-alpha2"
+users   = { version = "^0.9", optional = true }
 
 [dev-dependencies]
 rpassword = "2.0"

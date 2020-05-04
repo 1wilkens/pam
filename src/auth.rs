@@ -1,6 +1,7 @@
+//! Authentication related structure and functions
 use std::env;
 
-use crate::{conv, wrapped::*, PamFlag, PamHandle, PamResult, PamReturnCode};
+use crate::{conv, enums::*, functions::*, types::*};
 
 /// Main struct to authenticate a user
 ///

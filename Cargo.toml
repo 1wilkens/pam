@@ -23,10 +23,16 @@ auth = ["users"]
 module = []
 
 [dependencies]
-pam-macros = "=0.0.1"
+pam-macros = "=0.0.2"
 libc    = "^0.2"
 pam-sys = "1.0.0-alpha2"
 users   = { version = "^0.9", optional = true }
 
 [dev-dependencies]
 rpassword = "2.0"
+
+[workspace]
+members = [
+    ".",
+    "macros"
+]

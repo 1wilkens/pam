@@ -86,7 +86,7 @@ pub enum PamReturnCode {
     Try_Again,
 
     /// Ignore underlying account module regardless of whether
-    /// the control flag is required as isize, optional as isize, or sufficient
+    /// the control flag is required, optional, or sufficient
     Ignore,
 
     /// Critical error (?module fail now request)

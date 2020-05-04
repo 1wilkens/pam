@@ -47,7 +47,7 @@ impl<'a> Authenticator<'a, conv::PasswordConv> {
 }
 
 impl<'a, C: conv::Conversation> Authenticator<'a, C> {
-    /// Creates a new Authenticator with a given service name and conversation callback
+    /// Create a new Authenticator with a given service name and conversation callback
     pub fn with_handler(service: &str, conversation: C) -> PamResult<Authenticator<'a, C>> {
         let mut conversation = Box::new(conversation);
         let conv = conv::into_pam_conv(&mut *conversation);

@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Add Cargo features for `auth` (default) and `module`
 - Add internal `pam-macros` crate (experimental for now)
 - Reexport `pam_sys` at crate root
+- Add experimental support for modules via `PamModule` trait and `impl_pam_module` macro
 
 ### Changed
 - Change `Authenticator::get_handler` to `Authenticator::handler_mut` and add `Authenticator::handler` for immutable access to the handler

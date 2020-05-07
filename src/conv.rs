@@ -21,12 +21,12 @@ pub trait Conversation {
     ///
     /// This would typically be the username. The exact question is provided as the
     /// `msg` argument if you wish to display it to your user.
-    fn prompt_echo(&mut self, msg: &CStr) -> ::std::result::Result<CString, ()>;
+    fn prompt_echo(&mut self, msg: &CStr) -> Result<CString, ()>;
     /// PAM requests a value that should be typed blindly by the user
     ///
     /// This would typically be the password. The exact question is provided as the
     /// `msg` argument if you wish to display it to your user.
-    fn prompt_blind(&mut self, msg: &CStr) -> ::std::result::Result<CString, ()>;
+    fn prompt_blind(&mut self, msg: &CStr) -> Result<CString, ()>;
     /// This is an informational message from PAM
     fn info(&mut self, msg: &CStr);
     /// This is an error message from PAM
@@ -108,6 +108,7 @@ pub(crate) unsafe extern "C" fn converse<C: Conversation>(
         // FIXME: check this
         let m: &mut PamMessage = &mut *(*(msg.offset(i)) as *mut PamMessage);
         let r: &mut PamResponse = &mut *(resp.offset(i));
+
         let msg = CStr::from_ptr(m.msg);
         // match on msg_style
         match PamMessageStyle::from(m.msg_style) {
@@ -125,12 +126,12 @@ pub(crate) unsafe extern "C" fn converse<C: Conversation>(
                     result = PamReturnCode::Conv_Err;
                 }
             }
+            PamMessageStyle::Text_Info => {
+                handler.info(msg);
+            }
             PamMessageStyle::Error_Msg => {
                 handler.error(msg);
                 result = PamReturnCode::Conv_Err;
-            }
-            PamMessageStyle::Text_Info => {
-                handler.info(msg);
             }
         }
         if result != PamReturnCode::Success {

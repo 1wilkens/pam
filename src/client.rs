@@ -6,31 +6,31 @@ use crate::{conv, enums::*, functions::*, types::*};
 /// Main struct to authenticate a user
 ///
 /// You need to create an instance of it to start an authentication process. If you
-/// want a simple password-based authentication, you can use `Authenticator::with_password`,
+/// want a simple password-based authentication, you can use `Client::with_password`,
 /// and to the following flow:
 ///
 /// ```no_run
-/// use pam::Authenticator;
+/// use pam::Client;
 ///
-/// let mut authenticator = Authenticator::with_password("system-auth")
+/// let mut client = Client::with_password("system-auth")
 ///         .expect("Failed to init PAM client.");
 /// // Preset the login & password we will use for authentication
-/// authenticator.handler_mut().set_credentials("login", "password");
+/// client.handler_mut().set_credentials("login", "password");
 /// // Actually try to authenticate:
-/// authenticator.authenticate().expect("Authentication failed!");
+/// client.authenticate().expect("Authentication failed!");
 /// // Now that we are authenticated, it's possible to open a sesssion:
-/// authenticator.open_session().expect("Failed to open a session!");
+/// client.open_session().expect("Failed to open a session!");
 /// ```
 ///
 /// If you wish to customise the PAM conversation function, you should rather create your
-/// authenticator with `Authenticator::with_handler`, providing a struct implementing the
-/// `Conversation` trait. You can then mutably access your conversation handler using the
-/// `Authenticator::handler_mut` method.
+/// client with `Client::with_handler`, providing a struct implementing the
+/// `conv::Conversation` trait. You can then mutably access your conversation handler using the
+/// `Client::handler_mut` method.
 ///
-/// By default, the `Authenticator` will close any opened session when dropped. If you don't
+/// By default, the `Client` will close any opened session when dropped. If you don't
 /// want this, you can change its `close_on_drop` field to `False`.
-pub struct Authenticator<'a, C: conv::Conversation> {
-    /// Flag indicating whether the Authenticator should close the session on drop
+pub struct Client<'a, C: conv::Conversation> {
+    /// Flag indicating whether the Client should close the session on drop
     pub close_on_drop: bool,
     handle: &'a mut PamHandle,
     conversation: Box<C>,
@@ -39,21 +39,21 @@ pub struct Authenticator<'a, C: conv::Conversation> {
     last_code: PamReturnCode,
 }
 
-impl<'a> Authenticator<'a, conv::PasswordConv> {
-    /// Create a new `Authenticator` with a given service name and a password-based conversation
-    pub fn with_password(service: &str) -> PamResult<Authenticator<'a, conv::PasswordConv>> {
-        Authenticator::with_handler(service, conv::PasswordConv::new())
+impl<'a> Client<'a, conv::PasswordConv> {
+    /// Create a new `Client` with the given service name and a password-based conversation
+    pub fn with_password(service: &str) -> PamResult<Client<'a, conv::PasswordConv>> {
+        Client::with_conversation(service, conv::PasswordConv::new())
     }
 }
 
-impl<'a, C: conv::Conversation> Authenticator<'a, C> {
-    /// Create a new Authenticator with a given service name and conversation callback
-    pub fn with_handler(service: &str, conversation: C) -> PamResult<Authenticator<'a, C>> {
+impl<'a, C: conv::Conversation> Client<'a, C> {
+    /// Create a new `Client` with the given service name and conversation handler
+    pub fn with_conversation(service: &str, conversation: C) -> PamResult<Client<'a, C>> {
         let mut conversation = Box::new(conversation);
         let conv = conv::into_pam_conv(&mut *conversation);
 
         let handle = start(service, None, &conv)?;
-        Ok(Authenticator {
+        Ok(Client {
             close_on_drop: true,
             handle,
             conversation,
@@ -63,13 +63,13 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
         })
     }
 
-    /// Immutable access to the conversation handler of this Authenticator
-    pub fn handler(&self) -> &C {
+    /// Immutable access to the conversation handler of this Client
+    pub fn conversation(&self) -> &C {
         &*self.conversation
     }
 
-    /// Mutable access to the conversation handler of this Authenticator
-    pub fn handler_mut(&mut self) -> &mut C {
+    /// Mutable access to the conversation handler of this Client
+    pub fn conversation_mut(&mut self) -> &mut C {
         &mut *self.conversation
     }
 
@@ -104,7 +104,7 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
             return self.reset();
         }
 
-        self.last_code = open_session(self.handle, PamFlag::None);
+        self.last_code = open_session(self.handle, false);
         if self.last_code != PamReturnCode::Success {
             return self.reset();
         }
@@ -120,7 +120,7 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
     }
 
     // Initialize the client environment with common variables.
-    // Currently always called from Authenticator.open_session()
+    // Currently always called from Client.open_session()
     fn initialize_environment(&mut self) -> PamResult<()> {
         use users::os::unix::UserExt;
 
@@ -174,10 +174,10 @@ impl<'a, C: conv::Conversation> Authenticator<'a, C> {
     }
 }
 
-impl<'a, C: conv::Conversation> Drop for Authenticator<'a, C> {
+impl<'a, C: conv::Conversation> Drop for Client<'a, C> {
     fn drop(&mut self) {
         if self.has_open_session && self.close_on_drop {
-            close_session(self.handle, PamFlag::None);
+            close_session(self.handle, false);
         }
         let code = setcred(self.handle, PamFlag::Delete_Cred);
         end(self.handle, code);

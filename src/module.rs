@@ -34,7 +34,8 @@ pub trait PamModule {
 }
 
 #[macro_export]
-macro_rules! impl_pam_module {
+/// Export the given struct as a PAM module by wiring up the respective extern "C" functions
+macro_rules! export_pam_module {
     ($struct:ident) => {
         pub use _pam_module_::*;
         mod _pam_module_ {
@@ -115,10 +116,10 @@ macro_rules! impl_pam_module {
 #[cfg(test)]
 pub mod test {
     use super::PamModule;
-    use crate::impl_pam_module;
+    use crate::export_pam_module;
 
     pub struct TestModule;
     impl PamModule for TestModule {}
 
-    impl_pam_module!(TestModule);
+    export_pam_module!(TestModule);
 }

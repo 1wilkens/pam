@@ -17,9 +17,10 @@ edition = "2018"
 azure-devops = { project = "1wilkens/ci", pipeline = "pam" }
 
 [features]
-default = ["auth"]
+default = ["client"]
 
-auth = ["users"]
+functions = []
+client = ["users"]
 module = []
 
 [dependencies]

@@ -1,11 +1,8 @@
 //! Wrapped FFI bindings to Linux-PAM
 //!
 //! Rustified wrappers around the unsafe PAM functions.
-//!
-//! Note: These wrappers get added as I need them. Feel free to open an issue
-//! or PR for the ones that you require which haven't been added yet.
 
-#[cfg(feature = "auth")]
+#[cfg(feature = "client")]
 pub use appl::*;
 
 #[cfg(feature = "module")]
@@ -17,13 +14,17 @@ pub use types::*;
 pub use misc::*;
 
 /* ------------------------ <security/pam_appl.h> -------------------------- */
-#[cfg(feature = "auth")]
+#[cfg(feature = "client")]
 mod appl {
     use crate::{PamFlag, PamHandle, PamResult, PamReturnCode};
     use libc::c_int;
     use pam_sys as ffi;
     use std::ffi::CString;
 
+    /// Create the PAM context and initiate the PAM transaction
+    ///
+    /// This needs to be called by an application to obtain a `PamHandle` which
+    /// contains any transaction state.
     #[inline]
     pub fn start<'a>(
         service: &str,
@@ -54,45 +55,64 @@ mod appl {
         }
     }
 
+    /// Terminate the PAM transaction
+    ///
+    /// This function has to be called last in the PAM context.
     #[inline]
     pub fn end(handle: &mut PamHandle, status: PamReturnCode) -> PamReturnCode {
         // FIXME: Add PAM_DATA_SILENT argument?
         unsafe { ffi::pam_end(handle, status as c_int) }.into()
     }
 
+    /// Authenticate the user via the `Conversation` passed to `start`
+    ///
+    /// Valid `PamFlag`s: Silent, Disallow_Null_AuthTok
     #[inline]
     pub fn authenticate(handle: &mut PamHandle, flags: PamFlag) -> PamReturnCode {
-        // FIXME: man says, authenticate only accepts PAM_SILENT and PAM_DISALLOW_NULL_AUTHTOK
         unsafe { ffi::pam_authenticate(handle, flags as c_int) }.into()
     }
 
+    /// Modify the credentials of the user associated with the PAM transaction
+    ///
+    /// This function should be called after the user has been authenticated and
+    /// before a session is opened.
+    ///
+    /// Valid `PamFlag`s: Silent, {Establish,Delete,Reinitialize,Refresh}_Cred
     #[inline]
     pub fn setcred(handle: &mut PamHandle, flags: PamFlag) -> PamReturnCode {
-        // FIXME: man says, setcred only accepts PAM_{ESTABLISH,DELETE,REINITIALIZE,REFRESH}_CRED
         unsafe { ffi::pam_setcred(handle, flags as c_int) }.into()
     }
 
+    /// Determine if the user's account is valid
+    ///
+    /// This function is typically called after a user has been authenticated.
+    ///
+    /// Valid `PamFlag`s: Silent, Disallow_Null_AuthTok
     #[inline]
     pub fn acct_mgmt(handle: &mut PamHandle, flags: PamFlag) -> PamReturnCode {
-        // FIXME: man says, acct_mgmt only accepts PAM_SILENT and PAM_DISALLOW_NULL_AUTHTOK
         unsafe { ffi::pam_acct_mgmt(handle, flags as c_int) }.into()
     }
 
+    /// Set up a user session for a previously authenticated user
     #[inline]
-    pub fn open_session(handle: &mut PamHandle, flags: PamFlag) -> PamReturnCode {
-        // FIXME: Add PAM_SILENT argument?
-        unsafe { ffi::pam_open_session(handle, flags as c_int) }.into()
+    pub fn open_session(handle: &mut PamHandle, silent: bool) -> PamReturnCode {
+        let flag = silent as c_int;
+        unsafe { ffi::pam_open_session(handle, flag) }.into()
     }
 
+    /// Indicate that an authenticated user session has ended
     #[inline]
-    pub fn close_session(handle: &mut PamHandle, flags: PamFlag) -> PamReturnCode {
-        // FIXME: Add PAM_SILENT argument?
-        unsafe { ffi::pam_close_session(handle, flags as c_int) }.into()
+    pub fn close_session(handle: &mut PamHandle, silent: bool) -> PamReturnCode {
+        let flag = silent as c_int;
+        unsafe { ffi::pam_close_session(handle, flag) }.into()
     }
 
+    /// Change the authentication token for the user associated with the PAM
+    /// transaction
+    ///
+    /// Valid `PamFlag`s: Silent, Change_Expired_AuthTok
     #[inline]
     pub fn chauthtok(handle: &mut PamHandle, flags: PamFlag) -> PamReturnCode {
-        // FIXME: man says, chauthtok only accepts PAM_SILENT and PAM_CHANGE_EXPIRED_AUTHTOK
         unsafe { ffi::pam_chauthtok(handle, flags as c_int) }.into()
     }
 }
@@ -105,6 +125,7 @@ mod types {
     use pam_sys as ffi;
     use std::ffi::{CStr, CString};
 
+    /// Update PAM information of type `item_type` in the associated PAM transaction
     #[inline]
     pub fn set_item(
         handle: &mut PamHandle,
@@ -117,6 +138,7 @@ mod types {
         }
     }
 
+    /// Retrieve PAM information of type `item_type` from the associated PAM transaction
     #[inline]
     pub fn get_item<'a>(handle: &PamHandle, item_type: PamItemType) -> PamResult<&'a c_void> {
         let mut item_ptr: *const c_void = std::ptr::null();
@@ -132,6 +154,8 @@ mod types {
         }
     }
 
+    /// Retrieve a `CStr` describing the `PamReturnCode` passed, potentially
+    /// using LC_MESSAGES to localize the result
     #[inline]
     pub fn strerror(handle: &mut PamHandle, errnum: PamReturnCode) -> &str {
         // We don't match here, as man says this function always returns a pointer to a string
@@ -140,6 +164,7 @@ mod types {
             .expect("Got invalid UTF8 string from pam_strerror")
     }
 
+    /// Add or change PAM environment variables associated with the PAM transaction
     #[inline]
     pub fn putenv(handle: &mut PamHandle, name_value: &str) -> PamResult<()> {
         if let Ok(name_value) = CString::new(name_value) {
@@ -152,6 +177,8 @@ mod types {
         }
     }
 
+    /// Get he value of a PAM environment variable associated with the PAM
+    /// transaction
     #[inline]
     pub fn getenv<'a>(handle: &'a mut PamHandle, name: &str) -> PamResult<Option<&'a str>> {
         if let Ok(name) = CString::new(name) {
@@ -173,7 +200,10 @@ mod types {
         }
     }
 
-    /*#[inline]
+    // FIXME: Implement this properly
+    /*/// Retrieve a complee copy of the PAM environment associated with
+     /// the PAM transaction
+    #[inline]
     pub fn getenvlist(handle: &mut PamHandle) -> *const *const c_char {
         //TODO: find a convenient way to handle this with Rust types
         unsafe { ffi::pam_getenvlist(handle) }
@@ -189,6 +219,7 @@ mod misc {
     use pam_sys as ffi;
     use std::ffi::CString;
 
+    /// Update the PAM environment via the supplied list
     #[inline]
     pub fn misc_paste_env(handle: &mut PamHandle, user_env: &[&str]) -> PamResult<()> {
         // Taken from: https://github.com/rust-lang/rust/issues/9564#issuecomment-95354558
@@ -209,11 +240,15 @@ mod misc {
         }
     }
 
-    /*#[inline]
+    // FIXME: implement this properly
+    /*/// Free memory of an environment list obtained via `getenvlist`
+    #[inline]
     pub fn misc_drop_env(env: &mut *mut c_char) -> PamReturnCode {
         unsafe { ffi::pam_misc_drop_env(env) })
     }*/
 
+    /// Add or change PAM environment variables associated with the PAM transaction
+    /// in BSD style "name=value"
     #[inline]
     pub fn misc_setenv(
         handle: &mut PamHandle,
@@ -244,6 +279,8 @@ mod modules {
     use pam_sys as ffi;
     use std::ffi::{CStr, CString};
 
+    /// Associate a pointer to an object with the given `module_data_name` in
+    /// the current PAM context
     #[inline]
     pub fn set_data(
         handle: &mut PamHandle,
@@ -264,8 +301,13 @@ mod modules {
         }
     }
 
+    // FIXME: implement this properly
+    /*/// Retrieve the object associated with the given `module_data_name` from
+    /// the current PAM context
     //pub fn get_data(handle: *const PamHandle, module_data_name: *const c_char, data: *const *const c_void);
+     */
 
+    /// Return the name of the user as specified via `start`
     #[inline]
     pub fn get_user<'a>(handle: &'a PamHandle, prompt: Option<&str>) -> PamResult<&'a str> {
         // For some reason, bindgen marks the handl as mutable in pam_sys although man says const

@@ -15,7 +15,7 @@ use crate::{conv, enums::*, functions::*, types::*};
 /// let mut client = Client::with_password("system-auth")
 ///         .expect("Failed to init PAM client.");
 /// // Preset the login & password we will use for authentication
-/// client.handler_mut().set_credentials("login", "password");
+/// client.conversation_mut().set_credentials("login", "password");
 /// // Actually try to authenticate:
 /// client.authenticate().expect("Authentication failed!");
 /// // Now that we are authenticated, it's possible to open a sesssion:

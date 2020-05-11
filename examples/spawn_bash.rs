@@ -2,7 +2,7 @@ use std::io::{stdin, stdout, Write};
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
-use pam::Authenticator;
+use pam::Client;
 use rpassword::read_password_from_tty;
 use users::get_user_by_name;
 
@@ -22,17 +22,12 @@ fn main() {
     let password = read_password_from_tty(Some("password: ")).unwrap();
 
     // Now, setup the authenticator, we require the basic "system-auth" service
-    let mut authenticator =
-        Authenticator::with_password("system-auth").expect("Failed to init PAM client!");
-    authenticator
-        .handler_mut()
+    let mut client = Client::with_password("system-auth").expect("Failed to init PAM client!");
+    client
+        .conversation_mut()
         .set_credentials(login.clone(), password);
-    authenticator
-        .authenticate()
-        .expect("Authentication failed!");
-    authenticator
-        .open_session()
-        .expect("Failed to open a session!");
+    client.authenticate().expect("Authentication failed!");
+    client.open_session().expect("Failed to open a session!");
 
     // we now try to spawn `/bin/bash` as this user
     // note that setting the uid/gid is likely to fail if this program is not already run as the

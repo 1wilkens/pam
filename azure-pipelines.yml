@@ -2,6 +2,7 @@ jobs:
   - template: default.yml@templates
     parameters:
       cross: false
+      minrust: 1.34.0
       setup:
         - script: sudo apt install libpam0g-dev
 

@@ -12,6 +12,16 @@ use std::os::raw::c_uint;
 ///
 /// Modules should override the desired functions and call the macro `impl_pam_module`.
 /// This exports the respective functions at the expected symbols prefixed with `pam_sm_`.
+///
+/// ```no_run
+/// use pam::{PamModule, export_pam_module};
+///
+/// pub struct MyModule;
+/// impl PamModule for MyModule {}
+///
+/// // FIXME: Currently gets E0433: failed to resolve for `MyModule`
+/// //export_pam_module!(MyModule);
+/// ```
 pub trait PamModule {
     fn account_management(handle: &PamHandle, args: Vec<&CStr>, flags: c_uint) -> PamReturnCode {
         PamReturnCode::Ignore
@@ -39,9 +49,9 @@ macro_rules! export_pam_module {
     ($struct:ident) => {
         pub use _pam_module_::*;
         mod _pam_module_ {
-            use crate::{module::PamModule, PamHandle, PamReturnCode};
             use std::ffi::CStr;
             use std::os::raw::{c_char, c_int, c_uint};
+            use $crate::{PamHandle, PamModule, PamReturnCode};
 
             fn convert_args<'a>(argc: c_int, argv: *const *const c_char) -> Vec<&'a CStr> {
                 (0..argc)

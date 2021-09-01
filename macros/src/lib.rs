@@ -92,7 +92,7 @@ fn build_impl_block(
             } else {
                 // otherwise, fallback to pam_sys
                 // FIXME: This guard should not be necessary
-                parse_quote!(x if x as u32 == pam_sys::#id => #enum_name::#v_id,)
+                parse_quote!(x if x as i32 == pam_sys::#id => #enum_name::#v_id,)
             }
         })
         .collect();

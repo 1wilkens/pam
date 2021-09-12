@@ -10,6 +10,7 @@ categories = ["authentication"]
 repository = "https://github.com/1wilkens/pam/"
 documentation = "https://docs.rs/pam/"
 readme = "README.md"
+include = [ "LICENSE-*", "README.md", "CHANGELOG.md", "/src", "/examples"  ]
 
 edition = "2018"
 

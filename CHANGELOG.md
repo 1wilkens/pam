@@ -25,6 +25,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Generate enums via proc macro `#[pam_enum]` (experimental)
     - Make variants capitalized snake_case
     - Automatically implement `std::convert::From<i32>` to cast return values
+- Add `include` setting in `Cargo.toml`
 
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds

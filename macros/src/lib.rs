@@ -34,7 +34,7 @@ pub fn pam_enum(_: TokenStream, input: TokenStream) -> TokenStream {
     // Build enum variants from uppercased identifiers in pam_sys::
     def.variants = build_variants(&variants, &idents);
 
-    // Build additional impl block for From<u32>
+    // Build additional impl block for From<i32>
     let impl_block = build_impl_block(&def.ident, &variants, &idents);
 
     // Assemble the final TokenStream
@@ -65,7 +65,7 @@ fn build_variants(
         .zip(idents)
         .map(|(var, id)| {
             let mut var = var.clone();
-            // Only insert our discriminant of none was provided
+            // Only insert our discriminant if none was provided
             if var.discriminant.is_none() {
                 var.discriminant = Some((parse_quote!(=), parse_quote!(pam_sys::#id as isize)));
             }
@@ -92,7 +92,7 @@ fn build_impl_block(
             } else {
                 // otherwise, fallback to pam_sys
                 // FIXME: This guard should not be necessary
-                parse_quote!(x if x as u32 == pam_sys::#id => #enum_name::#v_id,)
+                parse_quote!(x if x == pam_sys::#id => #enum_name::#v_id,)
             }
         })
         .collect();

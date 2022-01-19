@@ -25,9 +25,9 @@ client = ["users"]
 module = []
 
 [dependencies]
-pam-macros = "=0.0.2"
+pam-macros = "=0.0.3"
 libc    = "^0.2"
-pam-sys = "1.0.0-alpha2"
+pam-sys = "1.0.0-alpha4"
 users   = { version = "^0.10", optional = true }
 
 [dev-dependencies]

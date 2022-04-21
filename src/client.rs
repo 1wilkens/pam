@@ -91,6 +91,16 @@ impl<'a, C: conv::Conversation> Client<'a, C> {
         Ok(())
     }
 
+    /// Perform the chauthtok to support password update
+    pub fn change_authentication_token(&mut self, flags: PamFlag) -> PamResult<()> {
+        self.last_code = chauthtok(self.handle, flags);
+        if self.last_code != PamReturnCode::Success {
+            // No need to reset here
+            return Err(From::from(self.last_code));
+        }
+        Ok(())
+    }
+
     /// Open a session for a previously authenticated user and
     /// initialize the environment appropriately (in PAM and regular enviroment variables).
     pub fn open_session(&mut self) -> PamResult<()> {

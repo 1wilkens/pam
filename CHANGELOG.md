@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Add internal `pam-macros` crate (experimental for now)
 - Reexport `pam_sys` at crate root
 - Add experimental support for modules via `PamModule` trait and `impl_pam_module` macro
+- Add Client::{change_authentication_token,get_user}
 
 ### Changed
 - Change `Authenticator::get_handler` to `Authenticator::handler_mut` and add `Authenticator::handler` for immutable access to the handler

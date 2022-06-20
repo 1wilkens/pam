@@ -16,6 +16,7 @@ mod conv;
 mod enums;
 mod functions;
 mod types;
+mod env;
 
 pub use crate::{enums::*, functions::*, types::*};
 

@@ -1,14 +1,17 @@
 use libc::c_char;
-use pam_sys::{getenvlist, raw, PamHandle};
+use crate::types::*;
+use pam_sys as raw;
 
 use std::ffi::CStr;
 
 pub struct PamEnvList {
-    ptr: *const *const c_char,
+    ptr: *mut *mut c_char,
 }
 
 pub fn get_pam_env(handle: &mut PamHandle) -> Option<PamEnvList> {
-    let env = getenvlist(handle);
+    let env = unsafe {
+        raw::pam_getenvlist(handle)
+	};
     if !env.is_null() {
         Some(PamEnvList { ptr: env })
     } else {
@@ -22,7 +25,7 @@ impl PamEnvList {
 
         let mut idx = 0;
         loop {
-            let env_ptr: *const *const c_char = unsafe { self.ptr.offset(idx) };
+            let env_ptr: *mut *mut c_char = unsafe { self.ptr.offset(idx) };
             if unsafe { !(*env_ptr).is_null() } {
                 idx += 1;
 

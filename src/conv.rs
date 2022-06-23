@@ -1,10 +1,9 @@
 use libc::{c_int, c_void, calloc, free, size_t, strdup};
-use pam_sys::pam_conv;
 
 use std::ffi::{CStr, CString};
 use std::mem;
 
-use crate::{PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
+use crate::{ffi::pam_conv, PamMessage, PamMessageStyle, PamResponse, PamReturnCode};
 
 /// A trait representing the PAM authentification conversation
 ///

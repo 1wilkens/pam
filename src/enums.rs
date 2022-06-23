@@ -1,8 +1,23 @@
+#![allow(non_upper_case_globals)]
+
 //! Types defined by Linux-PAM
 //!
 //! This modules contains struct and enum definitions used by `pam-sys`.
 
 use pam_macros::pam_enum;
+use bitflags::bitflags;
+
+
+bitflags! {
+    pub struct PamAuthenticateFlag: i32 {
+        /// Authentication service should not generate any messages
+        const Silent = pam_sys::PAM_SILENT;
+        /// The authentication service should return AUTH_ERROR
+        /// if the user has a null authentication token
+        /// (used by pam_authenticate{,_secondary}())
+        const DisallowNullAuthTok = pam_sys::PAM_DISALLOW_NULL_AUTHTOK;
+    }
+}
 
 /// The Linux-PAM return values
 #[pam_enum]

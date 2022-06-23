@@ -27,6 +27,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
     - Make variants capitalized snake_case
     - Automatically implement `std::convert::From<i32>` to cast return values
 - Add `include` setting in `Cargo.toml`
+- Export `pam_sys` at `crate::ffi`
 
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds

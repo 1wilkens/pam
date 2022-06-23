@@ -16,10 +16,10 @@ pub use misc::*;
 /* ------------------------ <security/pam_appl.h> -------------------------- */
 #[cfg(feature = "client")]
 mod appl {
-    use crate::{PamFlag, PamHandle, PamResult, PamReturnCode};
-    use libc::c_int;
-    use pam_sys as ffi;
+    use crate::{ffi, PamFlag, PamHandle, PamResult, PamReturnCode};
+
     use std::ffi::CString;
+    use libc::c_int;
 
     /// Create the PAM context and initiate the PAM transaction
     ///
@@ -120,10 +120,10 @@ mod appl {
 
 /* ----------------------- <security/_pam_types.h> ------------------------- */
 mod types {
-    use crate::{PamHandle, PamItemType, PamResult, PamReturnCode};
-    use libc::{c_int, c_void};
-    use pam_sys as ffi;
+    use crate::{ffi, PamHandle, PamItemType, PamResult, PamReturnCode};
+
     use std::ffi::{CStr, CString};
+    use libc::{c_int, c_void};
 
     /// Update PAM information of type `item_type` in the associated PAM transaction
     #[inline]
@@ -215,8 +215,8 @@ mod types {
 // FIXME: Investigate, if pam_misc is supported on any other platform
 #[cfg(target_os = "linux")]
 mod misc {
-    use crate::{PamHandle, PamResult, PamReturnCode};
-    use pam_sys as ffi;
+    use crate::{ffi, PamHandle, PamResult, PamReturnCode};
+
     use std::ffi::CString;
 
     /// Update the PAM environment via the supplied list
@@ -274,10 +274,10 @@ mod misc {
 /* ----------------------- <security/pam_modules.h> ------------------------ */
 #[cfg(feature = "module")]
 mod modules {
-    use crate::{PamHandle, PamResult, PamReturnCode};
-    use libc::{c_char, c_int, c_void};
-    use pam_sys as ffi;
+    use crate::{ffi, PamHandle, PamResult, PamReturnCode};
+
     use std::ffi::{CStr, CString};
+    use libc::{c_char, c_int, c_void};
 
     /// Associate a pointer to an object with the given `module_data_name` in
     /// the current PAM context

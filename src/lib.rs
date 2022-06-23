@@ -10,7 +10,7 @@
 //! root.
 
 // Reexport pam_sys so downstream users don't need to depend on it
-pub use pam_sys;
+pub use pam_sys as ffi;
 
 mod conv;
 mod enums;

@@ -32,6 +32,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Add untested(!) missing drop implementation for PamEnvList in non-linux builds
 
+### Removed
+- Remove `Conversation::username` as this should be done by the `Client` itself
+
 ## [0.7.0] - 2019-02-07
 ### Added
 - Add `Converse` trait to handle conversation with pam

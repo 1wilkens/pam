@@ -73,7 +73,7 @@ impl<'a, C: conv::Conversation> Client<'a, C> {
         &mut *self.conversation
     }
 
-    /// Perform the authentication with the provided credentials
+    /// Perform authentication with the provided credentials
     pub fn authenticate(&mut self) -> PamResult<()> {
         self.last_code = authenticate(self.handle, PamFlag::None);
         if self.last_code != PamReturnCode::Success {
@@ -147,10 +147,10 @@ impl<'a, C: conv::Conversation> Client<'a, C> {
     fn initialize_environment(&mut self) -> PamResult<()> {
         use users::os::unix::UserExt;
 
-        let user = users::get_user_by_name(self.conversation.username()).unwrap_or_else(|| {
+        let user = users::get_user_by_name(&self.get_user()?).unwrap_or_else(|| {
             panic!(
                 "Could not get user by name: {:?}",
-                self.conversation.username()
+                self.get_user()
             )
         });
 

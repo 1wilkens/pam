@@ -30,11 +30,6 @@ pub trait Conversation {
     fn info(&mut self, msg: &CStr);
     /// This is an error message from PAM
     fn error(&mut self, msg: &CStr);
-    /// Get the username that is being authenticated
-    ///
-    /// This method is not a PAM callback, but is rather used by the `Authenticator` to
-    /// setup the environment when opening a session.
-    fn username(&self) -> &str;
 }
 
 /// A minimalistic conversation handler, that uses given login and password
@@ -72,9 +67,6 @@ impl Conversation for PasswordConv {
     fn info(&mut self, _msg: &CStr) {}
     fn error(&mut self, msg: &CStr) {
         eprintln!("[PAM ERROR] {}", msg.to_string_lossy());
-    }
-    fn username(&self) -> &str {
-        &self.login
     }
 }
 

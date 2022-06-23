@@ -120,10 +120,10 @@ mod appl {
 
 /* ----------------------- <security/_pam_types.h> ------------------------- */
 mod types {
-    use crate::{ffi, PamHandle, PamItemType, PamResult, PamReturnCode};
+    use crate::{env, ffi, PamHandle, PamItemType, PamResult, PamReturnCode};
 
     use std::ffi::{CStr, CString};
-    use libc::{c_int, c_void};
+    use libc::{c_char, c_int, c_void};
 
     /// Update PAM information of type `item_type` in the associated PAM transaction
     #[inline]
@@ -201,13 +201,13 @@ mod types {
     }
 
     // FIXME: Implement this properly
-    /*/// Retrieve a complee copy of the PAM environment associated with
-     /// the PAM transaction
+    /// Retrieve a complee copy of the PAM environment associated with
+    /// the PAM transaction
     #[inline]
-    pub fn getenvlist(handle: &mut PamHandle) -> *const *const c_char {
-        //TODO: find a convenient way to handle this with Rust types
-        unsafe { ffi::pam_getenvlist(handle) }
-    }*/
+    pub fn getenvlist(handle: &mut PamHandle) -> env::PamEnvList {
+        let ptr = unsafe { ffi::pam_getenvlist(handle) };
+        env::PamEnvList::from_ptr(ptr as *const *const c_char)
+    }
 }
 /* ----------------------- <security/_pam_types.h> ------------------------- */
 

@@ -14,6 +14,7 @@ pub use pam_sys as ffi;
 
 mod conv;
 mod enums;
+mod env;
 mod functions;
 mod types;
 

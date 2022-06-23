@@ -1,63 +1,77 @@
 use libc::c_char;
-use pam_sys::{getenvlist, raw, PamHandle};
+use memchr::memchr;
 
-use std::ffi::CStr;
+use std::vec::IntoIter;
+use std::ffi::{CStr, OsString};
 
 pub struct PamEnvList {
-    ptr: *const *const c_char,
+    inner: IntoIter<(OsString, OsString)>
 }
 
-pub fn get_pam_env(handle: &mut PamHandle) -> Option<PamEnvList> {
-    let env = getenvlist(handle);
-    if !env.is_null() {
-        Some(PamEnvList { ptr: env })
-    } else {
-        None
+impl Iterator for PamEnvList {
+    type Item = (String, String);
+
+    fn next(&mut self) -> Option<(String, String)> {
+        self.inner.next().map(|(a, b)| (a.into_string().unwrap(), b.into_string().unwrap()))
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
     }
 }
 
 impl PamEnvList {
-    pub fn to_vec(&mut self) -> Vec<(String, String)> {
-        let mut vec = Vec::new();
+    pub(crate) fn from_ptr(ptr: *const *const c_char) -> PamEnvList {
+        let mut result = Vec::new();
 
-        let mut idx = 0;
-        loop {
-            let env_ptr: *const *const c_char = unsafe { self.ptr.offset(idx) };
-            if unsafe { !(*env_ptr).is_null() } {
-                idx += 1;
-
-                let env = unsafe { CStr::from_ptr(*env_ptr) }.to_string_lossy();
-                let split: Vec<_> = env.splitn(2, '=').collect();
-
-                if split.len() == 2 {
-                    // Only add valid env vars (contain at least one '=')
-                    vec.push((split[0].into(), split[1].into()));
+        unsafe {
+            let mut current = ptr;
+            if !current.is_null() {
+                while !(*current).is_null() {
+                    if let Some(key_value) = parse_env_line(CStr::from_ptr(*current).to_bytes()) {
+                        result.push(key_value);
+                    }
+                    current = current.add(1);
                 }
-            } else {
-                // Reached the end of the env array -> break out of the loop
-                break;
             }
         }
 
-        vec
+        drop_env_list(ptr);
+        return PamEnvList { inner: result.into_iter() };
     }
+}
+
+
+fn parse_env_line(input: &[u8]) -> Option<(OsString, OsString)> {
+    // Strategy (copied from glibc): Variable name and value are separated
+    // by an ASCII equals sign '='. Since a variable name must not be
+    // empty, allow variable names starting with an equals sign. Skip all
+    // malformed lines.
+    use std::os::unix::prelude::OsStringExt;
+
+    if input.is_empty() {
+        return None;
+    }
+    let pos = memchr(b'=', input).map(|p| p + 1);
+    pos.map(|p| {
+        (
+            OsStringExt::from_vec(input[..p].to_vec()),
+            OsStringExt::from_vec(input[p + 1..].to_vec()),
+        )
+    })
 }
 
 #[cfg(target_os = "linux")]
-impl Drop for PamEnvList {
-    fn drop(&mut self) {
-        unsafe { raw::pam_misc_drop_env(self.ptr as *mut *mut c_char) };
-    }
+fn drop_env_list(ptr: *const *const c_char) {
+    unsafe { crate::ffi::pam_misc_drop_env(ptr as *mut *mut c_char) };
 }
 
 #[cfg(not(target_os = "linux"))]
-impl Drop for PamEnvList {
-    fn drop(&mut self) {
-        let mut ptr = self.ptr;
-        while !ptr.is_null() {
-            unsafe { free(ptr) };
-            ptr = ptr.add(1);
-        }
-        unsafe { free(self.ptr) };
+fn drop_env_list(ptr: *const *const c_char) {
+    // FIXME: verify this
+    let mut cur = *ptr;
+    while !ptr.is_null() {
+        unsafe { free(ptr) };
+        ptr = ptr.add(1);
     }
+    unsafe { free(ptr) };
 }

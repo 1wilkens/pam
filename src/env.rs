@@ -51,7 +51,7 @@ fn parse_env_line(input: &[u8]) -> Option<(OsString, OsString)> {
     if input.is_empty() {
         return None;
     }
-    let pos = memchr(b'=', input).map(|p| p + 1);
+    let pos = memchr(b'=', input);
     pos.map(|p| {
         (
             OsStringExt::from_vec(input[..p].to_vec()),

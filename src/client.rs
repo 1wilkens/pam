@@ -142,6 +142,16 @@ impl<'a, C: conv::Conversation> Client<'a, C> {
         self.initialize_environment()
     }
 
+    /// Retreive environement variable set by pam
+    pub fn get_env_list(&mut self) -> Vec<(String, String)> {
+        let pam_env = getenvlist(self.handle);
+        let mut env = vec![];
+        for (name, value) in pam_env {
+            env.push((name, value));
+        }
+        env
+    }
+
     // Initialize the client environment with common variables.
     // Currently always called from Client.open_session()
     fn initialize_environment(&mut self) -> PamResult<()> {
@@ -171,6 +181,11 @@ impl<'a, C: conv::Conversation> Client<'a, C> {
         self.set_env("PWD", user.home_dir().to_str().unwrap())?;
         self.set_env("SHELL", user.shell().to_str().unwrap())?;
         // Note: We don't set PATH here, as this should be the job of `pam_env.so`
+
+        // Set env variable returned by pam module
+        for (name, value) in self.get_env_list() {
+            self.set_env(&name, &value)?;
+        }
 
         Ok(())
     }

@@ -1,5 +1,5 @@
 //! Authentication related structure and functions
-use std::{env, ffi::CStr};
+use std::{env, ffi::CStr, os::raw::c_char};
 
 use crate::{conv, enums::*, functions::*, types::*};
 
@@ -105,7 +105,7 @@ impl<'a, C: conv::Conversation> Client<'a, C> {
     pub fn get_user(&mut self) -> PamResult<String> {
         get_item(self.handle, PamItemType::User).and_then(|result| {
             // Pam user is a char *
-            let ptr: *const i8 = unsafe { std::mem::transmute(result) };
+            let ptr: *const c_char = unsafe { std::mem::transmute(result) };
             let username = unsafe { CStr::from_ptr(ptr) };
             match username.to_str() {
                 Err(_) => Err(PamError(PamReturnCode::System_Err)),

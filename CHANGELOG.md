@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Add Client::{change_authentication_token,get_user}
 
 ### Changed
+- **Possibly breaking**: make `conv::PasswordConv` public
 - Change `Authenticator::get_handler` to `Authenticator::handler_mut` and add `Authenticator::handler` for immutable access to the handler
 - Move CI to azure pipelines (and remove `.travis.yml`)
 - Make `PamReturnCode` field in `PamError` public to allow matching on it

@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+
+## [0.8.0] - 2023-11-01
 ### Added
 - Add Cargo features for `auth` (default) and `module`
 - Add internal `pam-macros` crate (experimental for now)
@@ -139,7 +141,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `users` dependency (0.4.2 -> 0.4.4)
 
 
-[Unreleased]: https://github.com/1wilkens/pam/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/1wilkens/pam/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/1wilkens/pam/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/1wilkens/pam/compare/v0.5.5...v0.7.0
 [0.5.5]: https://github.com/1wilkens/pam/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/1wilkens/pam/compare/v0.5.3...v0.5.4

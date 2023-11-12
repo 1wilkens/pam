@@ -3,7 +3,7 @@ use std::os::unix::process::CommandExt;
 use std::process::Command;
 
 use pam::Client;
-use rpassword::read_password_from_tty;
+use rpassword::prompt_password;
 use users::get_user_by_name;
 
 // A simple program that requests a login and a password and then spawns /bin/bash as the
@@ -19,7 +19,7 @@ fn main() {
     let mut login = String::new();
     stdin().read_line(&mut login).unwrap();
     login.pop(); // remove the trailing '\n'
-    let password = read_password_from_tty(Some("password: ")).unwrap();
+    let password = prompt_password("password: ").unwrap();
 
     // Now, setup the authenticator, we require the basic "system-auth" service
     let mut client = Client::with_password("system-auth").expect("Failed to init PAM client!");

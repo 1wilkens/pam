@@ -145,9 +145,9 @@ impl<'a, C: conv::Conversation> Client<'a, C> {
     // Initialize the client environment with common variables.
     // Currently always called from Client.open_session()
     fn initialize_environment(&mut self) -> PamResult<()> {
-        use users::os::unix::UserExt;
+        use uzers::os::unix::UserExt;
 
-        let user = users::get_user_by_name(&self.get_user()?).unwrap_or_else(|| {
+        let user = uzers::get_user_by_name(&self.get_user()?).unwrap_or_else(|| {
             panic!(
                 "Could not get user by name: {:?}",
                 self.get_user()

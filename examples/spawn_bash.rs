@@ -4,7 +4,7 @@ use std::process::Command;
 
 use pam::Client;
 use rpassword::prompt_password;
-use users::get_user_by_name;
+use uzers::get_user_by_name;
 
 // A simple program that requests a login and a password and then spawns /bin/bash as the
 // user who logged in.

@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## [Unreleased]
+### Security
+- Migrate from `users` to `uzers` to mitigate [RUSTSEC-2023-0059](https://rustsec.org/advisories/RUSTSEC-2023-0059.html)
 
 ## [0.8.0] - 2023-11-01
 ### Added
